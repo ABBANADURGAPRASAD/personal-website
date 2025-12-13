@@ -32,7 +32,7 @@ export class LoginComponent {
       next: (success) => {
         this.isLoading = false;
         if (success) {
-          this.router.navigate(['/secure/portfolio']);
+          this.router.navigate(['/secure']);
         } else {
           this.errorMessage = 'Invalid credentials. Please try again.';
         }

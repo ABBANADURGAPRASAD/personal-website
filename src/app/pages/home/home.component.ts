@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GalleryItem, Achievement, ContactForm } from '../../models/home.models';
 import { ContactService } from '../../services/contact.service';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-home',
@@ -13,6 +14,15 @@ import { ContactService } from '../../services/contact.service';
   styleUrl: './home.component.scss'
 })
 export class HomeComponent implements OnInit, OnDestroy {
+  secureMode = signal<boolean>(false);
+  
+  // Edit states
+  editingGallery = signal<string | null>(null);
+  editingAchievement = signal<string | null>(null);
+  
+  // Form models
+  galleryForm: Partial<GalleryItem> = {};
+  achievementForm: Partial<Achievement> = {};
   // Profile images carousel - Add your images to src/assets/images/ folder
   profileImages: string[] = [
     'assets/images/profile1.jpg',  // Add your profile images to src/assets/images/ folder
@@ -21,8 +31,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   ];
   currentProfileImageIndex = 0;
   profileImageInterval: any;
-  // Gallery items
-  galleryItems: GalleryItem[] = [
+  // Gallery items - using signal for reactivity
+  galleryItems = signal<GalleryItem[]>([
     {
       id: '1',
       title: 'Project Showcase',
@@ -65,10 +75,10 @@ export class HomeComponent implements OnInit, OnDestroy {
       description: 'Modern User Interface',
       category: 'Frontend'
     }
-  ];
+  ]);
 
-  // Achievements
-  achievements: Achievement[] = [
+  // Achievements - using signal for reactivity
+  achievements = signal<Achievement[]>([
     {
       id: '1',
       title: 'Certified Java Developer',
@@ -117,7 +127,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       date: '2024',
       organization: 'IEEE'
     }
-  ];
+  ]);
 
   // Contact form
   contactForm: ContactForm = {
@@ -130,9 +140,20 @@ export class HomeComponent implements OnInit, OnDestroy {
   submitSuccess = false;
   submitError = '';
 
-  constructor(private contactService: ContactService) {}
+  constructor(
+    private contactService: ContactService,
+    private route: ActivatedRoute,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    // Determine mode from route data
+    let routeData = this.route.snapshot.data;
+    if (!routeData['secureMode'] && this.route.parent) {
+      routeData = this.route.parent.snapshot.data;
+    }
+    this.secureMode.set(routeData['secureMode'] === true);
+    
     // Start profile image carousel (changes every 3 seconds)
     this.startProfileCarousel();
   }
@@ -191,6 +212,90 @@ export class HomeComponent implements OnInit, OnDestroy {
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  }
+
+  // Admin editing methods
+  startEditGallery(item: GalleryItem): void {
+    this.editingGallery.set(item.id);
+    this.galleryForm = { ...item };
+  }
+
+  cancelEditGallery(): void {
+    this.editingGallery.set(null);
+    this.galleryForm = {};
+  }
+
+  saveGallery(): void {
+    if (this.editingGallery()) {
+      const items = this.galleryItems();
+      const index = items.findIndex(item => item.id === this.editingGallery());
+      if (index !== -1) {
+        items[index] = { ...items[index], ...this.galleryForm } as GalleryItem;
+        this.galleryItems.set([...items]);
+      }
+      this.cancelEditGallery();
+    }
+  }
+
+  deleteGalleryItem(id: string): void {
+    const items = this.galleryItems().filter(item => item.id !== id);
+    this.galleryItems.set(items);
+  }
+
+  addGalleryItem(): void {
+    const newItem: GalleryItem = {
+      id: Date.now().toString(),
+      title: this.galleryForm.title || 'New Item',
+      imageUrl: this.galleryForm.imageUrl || '',
+      description: this.galleryForm.description,
+      category: this.galleryForm.category
+    };
+    this.galleryItems.set([...this.galleryItems(), newItem]);
+    this.galleryForm = {};
+  }
+
+  startEditAchievement(achievement: Achievement): void {
+    this.editingAchievement.set(achievement.id);
+    this.achievementForm = { ...achievement };
+  }
+
+  cancelEditAchievement(): void {
+    this.editingAchievement.set(null);
+    this.achievementForm = {};
+  }
+
+  saveAchievement(): void {
+    if (this.editingAchievement()) {
+      const items = this.achievements();
+      const index = items.findIndex(item => item.id === this.editingAchievement());
+      if (index !== -1) {
+        items[index] = { ...items[index], ...this.achievementForm } as Achievement;
+        this.achievements.set([...items]);
+      }
+      this.cancelEditAchievement();
+    }
+  }
+
+  deleteAchievement(id: string): void {
+    const items = this.achievements().filter(item => item.id !== id);
+    this.achievements.set(items);
+  }
+
+  addAchievement(): void {
+    const newAchievement: Achievement = {
+      id: Date.now().toString(),
+      title: this.achievementForm.title || 'New Achievement',
+      description: this.achievementForm.description || '',
+      icon: this.achievementForm.icon || '🏆',
+      date: this.achievementForm.date,
+      organization: this.achievementForm.organization
+    };
+    this.achievements.set([...this.achievements(), newAchievement]);
+    this.achievementForm = {};
+  }
+
+  logout(): void {
+    this.authService.logout();
   }
 }
 

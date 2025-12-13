@@ -1,0 +1,28 @@
+<div class="admin-dashboard">
+  <header class="dashboard-header">
+    <h1>🔐 Admin Dashboard</h1>
+    <button class="btn-logout" (click)="logout()">Logout</button>
+  </header>
+
+  <div class="dashboard-content">
+    <h2>Manage Your Portfolio</h2>
+    <p class="subtitle">Select an option to edit content</p>
+
+    <div class="admin-options">
+      <a routerLink="/secure/home" class="admin-card">
+        <div class="card-icon">🏠</div>
+        <h3>Home Page</h3>
+        <p>Edit home page content, gallery, achievements, and profile information</p>
+        <span class="card-arrow">→</span>
+      </a>
+
+      <a routerLink="/secure/portfolio" class="admin-card">
+        <div class="card-icon">💼</div>
+        <h3>Portfolio</h3>
+        <p>Manage profile, skills, and projects</p>
+        <span class="card-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</div>
+

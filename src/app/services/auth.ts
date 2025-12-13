@@ -1,5 +1,5 @@
-import { Injectable, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Injectable, signal, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Observable, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 
@@ -7,14 +7,17 @@ import { tap, catchError } from 'rxjs/operators';
 export class AuthService {
   private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_KEY = 'auth_user';
+  private readonly platformId = inject(PLATFORM_ID);
   
   // Using signals for reactive state
-  private isAuthenticatedSignal = signal<boolean>(this.checkAuthStatus());
+  private isAuthenticatedSignal = signal<boolean>(false);
   public readonly isAuthenticated$ = this.isAuthenticatedSignal.asReadonly();
 
-  constructor(private router: Router) {
-    // Check for existing token on service initialization
-    this.checkAuthStatus();
+  constructor() {
+    // Check for existing token on service initialization (only in browser)
+    if (isPlatformBrowser(this.platformId)) {
+      this.isAuthenticatedSignal.set(this.checkAuthStatus());
+    }
   }
 
   /**
@@ -44,10 +47,16 @@ export class AuthService {
    * Logout method - clears token and redirects
    */
   logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        localStorage.removeItem(this.TOKEN_KEY);
+        localStorage.removeItem(this.USER_KEY);
+      } catch (e) {
+        console.error('Error during logout:', e);
+      }
+    }
     this.isAuthenticatedSignal.set(false);
-    this.router.navigate(['/']);
+    // Router navigation will be handled by the component calling logout
   }
 
   /**
@@ -61,23 +70,43 @@ export class AuthService {
    * Get current auth token (for API calls)
    */
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        return localStorage.getItem(this.TOKEN_KEY);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
   }
 
   /**
    * Get current user info
    */
   getCurrentUser(): any {
-    const userStr = localStorage.getItem(this.USER_KEY);
-    return userStr ? JSON.parse(userStr) : null;
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        const userStr = localStorage.getItem(this.USER_KEY);
+        return userStr ? JSON.parse(userStr) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
   }
 
   /**
    * Set authentication token and user info
    */
   private setAuthToken(token: string, user: any): void {
-    localStorage.setItem(this.TOKEN_KEY, token);
-    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        localStorage.setItem(this.TOKEN_KEY, token);
+        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+      } catch (e) {
+        console.error('Error storing auth token:', e);
+      }
+    }
     this.isAuthenticatedSignal.set(true);
   }
 
@@ -85,11 +114,17 @@ export class AuthService {
    * Check authentication status from localStorage
    */
   private checkAuthStatus(): boolean {
-    const token = localStorage.getItem(this.TOKEN_KEY);
-    if (token) {
-      // TODO: Validate token expiration with backend
-      // For now, just check if token exists
-      return true;
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        const token = localStorage.getItem(this.TOKEN_KEY);
+        if (token) {
+          // TODO: Validate token expiration with backend
+          // For now, just check if token exists
+          return true;
+        }
+      } catch (e) {
+        return false;
+      }
     }
     return false;
   }

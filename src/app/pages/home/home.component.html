@@ -1,4 +1,15 @@
-<div class="home-container">
+<div class="home-container" [class.secure-mode]="secureMode()">
+  <!-- Admin Header -->
+  <header class="admin-header" *ngIf="secureMode()">
+    <div class="header-content">
+      <a routerLink="/secure" class="btn-back">← Back to Dashboard</a>
+      <div class="mode-indicator">
+        <span class="badge secure">🔐 Admin Mode - Home Page</span>
+        <button class="btn-logout" (click)="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
   <!-- Top Section: Welcome (Left) and Buttons (Right) -->
   <div class="top-section">
     <!-- Welcome Section (Left) -->
@@ -8,7 +19,7 @@
     </section>
     
     <!-- Buttons Section (Right) -->
-    <section class="buttons-section">
+    <section class="buttons-section" *ngIf="!secureMode()">
       <div class="nav-buttons">
         <a routerLink="/portfolio" class="btn btn-primary">View Portfolio</a>
         <a routerLink="/login" class="btn btn-secondary">Admin Login</a>
@@ -45,10 +56,15 @@
 
   <!-- Gallery Section (Bottom, Full Width) -->
   <section class="gallery-section">
-    <h2 class="section-title">Gallery</h2>
-    <p class="section-subtitle">A visual showcase of my work and projects</p>
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Gallery</h2>
+        <p class="section-subtitle">A visual showcase of my work and projects</p>
+      </div>
+      <button *ngIf="secureMode() && !editingGallery()" class="btn-add" (click)="addGalleryItem()">+ Add Item</button>
+    </div>
     <div class="gallery-grid">
-      <div *ngFor="let item of galleryItems" class="gallery-item">
+      <div *ngFor="let item of galleryItems()" class="gallery-item">
         <div class="gallery-image">
           <img [src]="item.imageUrl" [alt]="item.title" />
           <div class="gallery-overlay">
@@ -57,22 +73,58 @@
             <span *ngIf="item.category" class="gallery-category">{{ item.category }}</span>
           </div>
         </div>
+        <div *ngIf="secureMode()" class="gallery-actions">
+          <button class="btn-edit" (click)="startEditGallery(item)">✏️ Edit</button>
+          <button class="btn-delete" (click)="deleteGalleryItem(item.id)">🗑️ Delete</button>
+        </div>
+        <!-- Edit Form -->
+        <div *ngIf="secureMode() && editingGallery() === item.id" class="edit-form">
+          <input [(ngModel)]="galleryForm.title" placeholder="Title" />
+          <input [(ngModel)]="galleryForm.imageUrl" placeholder="Image URL" />
+          <input [(ngModel)]="galleryForm.description" placeholder="Description" />
+          <input [(ngModel)]="galleryForm.category" placeholder="Category" />
+          <div class="form-actions">
+            <button (click)="saveGallery()" class="btn-save">Save</button>
+            <button (click)="cancelEditGallery()" class="btn-cancel">Cancel</button>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- Achievements Section -->
   <section class="achievements-section">
-    <h2 class="section-title">Achievements & Certifications</h2>
-    <p class="section-subtitle">Recognition and milestones in my career</p>
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Achievements & Certifications</h2>
+        <p class="section-subtitle">Recognition and milestones in my career</p>
+      </div>
+      <button *ngIf="secureMode() && !editingAchievement()" class="btn-add" (click)="addAchievement()">+ Add Achievement</button>
+    </div>
     <div class="achievements-grid">
-      <div *ngFor="let achievement of achievements" class="achievement-card">
+      <div *ngFor="let achievement of achievements()" class="achievement-card">
         <div class="achievement-icon">{{ achievement.icon }}</div>
         <h3>{{ achievement.title }}</h3>
         <p>{{ achievement.description }}</p>
         <div class="achievement-meta">
           <span *ngIf="achievement.organization" class="organization">{{ achievement.organization }}</span>
           <span *ngIf="achievement.date" class="date">{{ achievement.date }}</span>
+        </div>
+        <div *ngIf="secureMode()" class="achievement-actions">
+          <button class="btn-edit" (click)="startEditAchievement(achievement)">✏️ Edit</button>
+          <button class="btn-delete" (click)="deleteAchievement(achievement.id)">🗑️ Delete</button>
+        </div>
+        <!-- Edit Form -->
+        <div *ngIf="secureMode() && editingAchievement() === achievement.id" class="edit-form">
+          <input [(ngModel)]="achievementForm.title" placeholder="Title" />
+          <input [(ngModel)]="achievementForm.description" placeholder="Description" />
+          <input [(ngModel)]="achievementForm.icon" placeholder="Icon (emoji)" />
+          <input [(ngModel)]="achievementForm.date" placeholder="Date" />
+          <input [(ngModel)]="achievementForm.organization" placeholder="Organization" />
+          <div class="form-actions">
+            <button (click)="saveAchievement()" class="btn-save">Save</button>
+            <button (click)="cancelEditAchievement()" class="btn-cancel">Cancel</button>
+          </div>
         </div>
       </div>
     </div>

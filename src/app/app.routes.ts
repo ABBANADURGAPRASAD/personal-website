@@ -15,7 +15,11 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    loadComponent: () => import('./pages/login/login').then(m => m.LoginComponent),
+    loadComponent: async () => {
+      const module = await import('./pages/login/login');
+      return module.LoginComponent;
+    },
+    data: { secureMode: false },
     title: 'Login'
   },
   // Secure routes - protected by auth guard
@@ -24,15 +28,21 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {
+        path: '',
+        loadComponent: () => import('./pages/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent),
+        title: 'Admin Dashboard'
+      },
+      {
+        path: 'home',
+        loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent),
+        data: { secureMode: true },
+        title: 'Admin - Home Page'
+      },
+      {
         path: 'portfolio',
         loadComponent: () => import('./pages/portfolio/portfolio').then(m => m.PortfolioComponent),
         data: { secureMode: true },
         title: 'Admin - Portfolio'
-      },
-      {
-        path: '',
-        redirectTo: 'portfolio',
-        pathMatch: 'full'
       }
     ]
   },

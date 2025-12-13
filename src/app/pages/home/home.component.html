@@ -1,0 +1,118 @@
+<div class="home-container">
+  <section class="hero">
+    <h1>Welcome to My Portfolio</h1>
+    <p class="subtitle">Full Stack Developer | Spring Boot | Angular | AI</p>
+    <div class="cta-buttons">
+      <a routerLink="/portfolio" class="btn btn-primary">View Portfolio</a>
+      <a routerLink="/login" class="btn btn-secondary">Admin Login</a>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="feature-card">
+      <h3>🚀 Projects</h3>
+      <p>Explore my latest projects and technical implementations</p>
+    </div>
+    <div class="feature-card">
+      <h3>💼 Skills</h3>
+      <p>Comprehensive overview of my technical expertise</p>
+    </div>
+    <div class="feature-card">
+      <h3>📝 Experience</h3>
+      <p>Learn about my professional journey and achievements</p>
+    </div>
+  </section>
+
+  <!-- Gallery Section -->
+  <section class="gallery-section">
+    <h2 class="section-title">Gallery</h2>
+    <p class="section-subtitle">A visual showcase of my work and projects</p>
+    <div class="gallery-grid">
+      <div *ngFor="let item of galleryItems" class="gallery-item">
+        <div class="gallery-image">
+          <img [src]="item.imageUrl" [alt]="item.title" />
+          <div class="gallery-overlay">
+            <h3>{{ item.title }}</h3>
+            <p *ngIf="item.description">{{ item.description }}</p>
+            <span *ngIf="item.category" class="gallery-category">{{ item.category }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Achievements Section -->
+  <section class="achievements-section">
+    <h2 class="section-title">Achievements & Certifications</h2>
+    <p class="section-subtitle">Recognition and milestones in my career</p>
+    <div class="achievements-grid">
+      <div *ngFor="let achievement of achievements" class="achievement-card">
+        <div class="achievement-icon">{{ achievement.icon }}</div>
+        <h3>{{ achievement.title }}</h3>
+        <p>{{ achievement.description }}</p>
+        <div class="achievement-meta">
+          <span *ngIf="achievement.organization" class="organization">{{ achievement.organization }}</span>
+          <span *ngIf="achievement.date" class="date">{{ achievement.date }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="contact-section">
+    <h2 class="section-title">Get In Touch</h2>
+    <p class="section-subtitle">Have a project in mind? Let's discuss how we can work together</p>
+    
+    <div *ngIf="submitSuccess" class="success-message">
+      ✅ Thank you! Your message has been sent successfully. I'll get back to you soon.
+    </div>
+
+    <div *ngIf="submitError" class="error-message">
+      ❌ {{ submitError }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="contact-form" #contactFormRef="ngForm">
+      <div class="form-group">
+        <label for="name">Name *</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          [(ngModel)]="contactForm.name"
+          required
+          placeholder="Your full name"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="contactForm.email"
+          required
+          placeholder="your.email@example.com"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="message">Message *</label>
+        <textarea
+          id="message"
+          name="message"
+          [(ngModel)]="contactForm.message"
+          required
+          rows="6"
+          placeholder="Tell me about your project or inquiry..."
+        ></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit" [disabled]="isSubmitting">
+        <span *ngIf="!isSubmitting">Send Message</span>
+        <span *ngIf="isSubmitting">Sending...</span>
+      </button>
+    </form>
+  </section>
+</div>
+

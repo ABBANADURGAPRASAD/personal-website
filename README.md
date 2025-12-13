@@ -1,59 +1,248 @@
-# PortfolioDp
+# Portfolio Website - Angular Full Stack Application
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.13.
+A modern, full-stack-ready portfolio website built with Angular, featuring dual-mode architecture (public and secure/admin modes) using the same UI components. The application is designed to seamlessly integrate with a Spring Boot backend with JWT authentication.
 
-## Development server
+## 🚀 Features
 
-To start a local development server, run:
+- **Dual-Mode Architecture**: Same components for both public (read-only) and secure (admin) views
+- **Modern UI/UX**: Clean, responsive design with smooth animations
+- **Authentication System**: JWT-ready authentication service with route guards
+- **Portfolio Management**: 
+  - Profile information with social links
+  - Skills categorized by type with proficiency levels
+  - Projects with technologies, links, and featured status
+- **Admin Features** (Secure Mode):
+  - Edit profile information
+  - Add/Edit/Delete skills
+  - Add/Edit/Delete projects
+  - Real-time updates with reactive state management
+- **Backend-Ready**: Services structured for easy Spring Boot integration
+- **Standalone Components**: Modern Angular architecture with standalone components
+- **Responsive Design**: Mobile-first approach with modern CSS
 
+## 📁 Project Structure
+
+```
+src/app/
+├── models/
+│   └── portfolio.models.ts          # TypeScript interfaces (Profile, Skill, Project)
+├── services/
+│   ├── auth.ts                      # Authentication service (JWT-ready)
+│   └── portfolio.service.ts        # Portfolio data management service
+├── guards/
+│   └── auth-guard.ts                # Route guard for protected routes
+├── pages/
+│   ├── home/
+│   │   ├── home.component.ts       # Landing page component
+│   │   ├── home.component.html
+│   │   └── home.component.scss
+│   ├── login/
+│   │   ├── login.component.ts       # Login component with modern UI
+│   │   ├── login.component.html
+│   │   └── login.component.scss
+│   └── portfolio/
+│       ├── portfolio.component.ts   # Main portfolio component (dual-mode)
+│       ├── portfolio.component.html
+│       └── portfolio.component.scss
+├── app.routes.ts                     # Routing configuration
+└── app.config.ts                     # Application configuration
+```
+
+## 🏗️ Architecture
+
+### Dual-Mode Design
+
+The application uses a single component (`PortfolioComponent`) for both public and secure views. The mode is determined by route data:
+
+- **Public Routes**: `/portfolio` - Read-only view
+- **Secure Routes**: `/secure/portfolio` - Protected by auth guard, enables editing
+
+The component uses Angular signals to reactively manage state and conditionally render edit controls based on `secureMode`.
+
+### Services
+
+#### AuthService (`src/app/services/auth.ts`)
+- JWT-ready authentication service
+- Token management with localStorage
+- Observable-based login method (ready for HTTP integration)
+- Token validation support
+- Currently uses mock authentication (username: `admin`, password: `admin123`)
+
+#### PortfolioService (`src/app/services/portfolio.service.ts`)
+- Manages portfolio data (Profile, Skills, Projects)
+- Reactive state with Angular signals
+- CRUD operations for all portfolio entities
+- localStorage persistence (temporary, replace with HTTP calls)
+- Structured for easy backend integration
+
+### Routing
+
+```typescript
+/                    → HomeComponent (landing page)
+/portfolio           → PortfolioComponent (public mode)
+/login               → LoginComponent
+/secure/portfolio    → PortfolioComponent (secure mode, protected)
+```
+
+## 🚦 Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn
+- Angular CLI 20.3+
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the development server:
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+4. Navigate to `http://localhost:4200/`
 
-## Code scaffolding
+### Default Credentials
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- **Username**: `admin`
+- **Password**: `admin123`
 
-```bash
-ng generate component component-name
+## 🔧 Backend Integration
+
+The application is structured for easy integration with a Spring Boot backend. Here's what needs to be updated:
+
+### 1. AuthService Integration
+
+In `src/app/services/auth.ts`, replace the mock login method:
+
+```typescript
+login(username: string, password: string): Observable<boolean> {
+  return this.http.post<AuthResponse>('/api/auth/login', { username, password })
+    .pipe(
+      tap(response => this.setAuthToken(response.token, response.user)),
+      map(() => true),
+      catchError(() => of(false))
+    );
+}
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### 2. PortfolioService Integration
 
-```bash
-ng generate --help
+In `src/app/services/portfolio.service.ts`, replace mock methods with HTTP calls:
+
+```typescript
+getPortfolioData(): Observable<PortfolioData> {
+  return this.http.get<PortfolioData>('/api/portfolio')
+    .pipe(tap(data => this.portfolioDataSignal.set(data)));
+}
+
+updateProfile(profile: Partial<Profile>): Observable<Profile> {
+  return this.http.put<Profile>(`/api/portfolio/profile`, profile)
+    .pipe(
+      tap(updated => {
+        const current = this.portfolioDataSignal();
+        this.portfolioDataSignal.set({ ...current, profile: updated });
+      })
+    );
+}
 ```
 
-## Building
+### 3. HTTP Interceptor (Recommended)
 
-To build the project run:
+Create an HTTP interceptor to automatically attach JWT tokens:
+
+```typescript
+// src/app/interceptors/auth.interceptor.ts
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
+  const token = authService.getToken();
+  
+  if (token) {
+    req = req.clone({
+      setHeaders: { Authorization: `Bearer ${token}` }
+    });
+  }
+  
+  return next(req);
+};
+```
+
+Add to `app.config.ts`:
+```typescript
+provideHttpClient(withInterceptors([authInterceptor]))
+```
+
+### 4. Backend API Endpoints Expected
+
+```
+POST   /api/auth/login          - Login endpoint
+GET    /api/auth/validate        - Token validation
+GET    /api/portfolio            - Get portfolio data
+PUT    /api/portfolio/profile    - Update profile
+POST   /api/portfolio/skills     - Add skill
+PUT    /api/portfolio/skills/:id - Update skill
+DELETE /api/portfolio/skills/:id - Delete skill
+POST   /api/portfolio/projects   - Add project
+PUT    /api/portfolio/projects/:id - Update project
+DELETE /api/portfolio/projects/:id - Delete project
+```
+
+## 🎨 Customization
+
+### Styling
+
+- Global styles: `src/styles.scss`
+- Component styles: Each component has its own `.scss` file
+- Color scheme: Easily customizable via CSS variables (can be added)
+
+### Data Models
+
+Modify `src/app/models/portfolio.models.ts` to add new fields or entities.
+
+## 📝 Development
+
+### Build for Production
 
 ```bash
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+### Run Tests
 
 ```bash
 ng test
 ```
 
-## Running end-to-end tests
+## 🔐 Security Notes
 
-For end-to-end (e2e) testing, run:
+- Currently uses localStorage for token storage (consider httpOnly cookies for production)
+- Auth guard protects secure routes
+- All admin operations require authentication
+- JWT token validation should be implemented on the backend
 
-```bash
-ng e2e
-```
+## 🚀 Future Enhancements
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+- [ ] Image upload for profile avatar and project images
+- [ ] Rich text editor for project descriptions
+- [ ] Drag-and-drop for project/skill ordering
+- [ ] Export portfolio as PDF
+- [ ] Multi-language support
+- [ ] Dark mode toggle
+- [ ] Analytics integration
 
-## Additional Resources
+## 📄 License
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+This project is open source and available under the MIT License.
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+
+---
+
+Built with ❤️ using Angular 20

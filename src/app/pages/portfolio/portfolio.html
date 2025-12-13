@@ -1,14 +1,14 @@
 <div class="portfolio-container" [class.secure-mode]="secureMode()">
-  <!-- Header with mode indicator -->
+  <!-- Header with back button and mode indicator -->
   <header class="portfolio-header">
     <div class="header-content">
+      <a routerLink="/" class="btn-back">← Back to Home</a>
       <div class="mode-indicator" *ngIf="secureMode()">
         <span class="badge secure">🔐 Admin Mode</span>
         <button class="btn-logout" (click)="logout()">Logout</button>
       </div>
       <div class="mode-indicator" *ngIf="!secureMode()">
         <span class="badge public">🔓 Public View</span>
-        <a routerLink="/login" class="btn-admin">Admin Login</a>
       </div>
     </div>
   </header>

@@ -1,8 +1,12 @@
 .portfolio-container {
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 2rem;
   min-height: 100vh;
+  position: relative;
+  box-sizing: border-box;
+  background: white;
 
   &.secure-mode {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -20,6 +24,25 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
+  }
+
+  .btn-back {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    background: #3b82f6;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &:hover {
+      background: #2563eb;
+      transform: translateX(-2px);
+    }
   }
 
   .mode-indicator {

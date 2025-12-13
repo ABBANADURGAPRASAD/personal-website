@@ -1,29 +1,49 @@
 <div class="home-container">
-  <section class="hero">
-    <h1>Welcome to My Portfolio</h1>
-    <p class="subtitle">Full Stack Developer | Spring Boot | Angular | AI</p>
-    <div class="cta-buttons">
-      <a routerLink="/portfolio" class="btn btn-primary">View Portfolio</a>
-      <a routerLink="/login" class="btn btn-secondary">Admin Login</a>
+  <!-- Top Section: Welcome (Left) and Buttons (Right) -->
+  <div class="top-section">
+    <!-- Welcome Section (Left) -->
+    <section class="welcome-section">
+      <h1>Welcome to My World</h1>
+      <p class="subtitle">Full Stack Developer | Spring Boot | Angular | AI</p>
+    </section>
+    
+    <!-- Buttons Section (Right) -->
+    <section class="buttons-section">
+      <div class="nav-buttons">
+        <a routerLink="/portfolio" class="btn btn-primary">View Portfolio</a>
+        <a routerLink="/login" class="btn btn-secondary">Admin Login</a>
+      </div>
+    </section>
+  </div>
+
+  <!-- Profile and Bio Data Section (Single Line) -->
+  <section class="profile-bio-section">
+    <div class="profile-picture">
+      <div class="profile-carousel">
+        <img 
+          *ngFor="let img of profileImages; let i = index"
+          [src]="img" 
+          [alt]="'Profile image ' + (i + 1)"
+          [class.active]="i === currentProfileImageIndex"
+          class="profile-image"
+          (error)="$event.target.src='assets/images/placeholder.jpg'"
+        />
+        <div class="profile-indicators" *ngIf="profileImages.length > 1">
+          <span 
+            *ngFor="let img of profileImages; let i = index"
+            [class.active]="i === currentProfileImageIndex"
+            class="indicator"
+          ></span>
+        </div>
+      </div>
+    </div>
+    <div class="bio-card">
+      <h3>BIO DATA</h3>
+      <p>I am an Associate Software Engineer at Vision Waves with a strong foundation in Java, Spring Boot, REST APIs, and full-stack development. I hold a B.Tech in Artificial Intelligence & Machine Learning (CGPA: 8.2) and have hands-on experience building backend systems and AI-powered applications. I have presented my research on Brain Tumor Detection using ResNet at the 2nd International IEEE Conference, a milestone achievement in my academic journey. I am passionate about learning Spring AI, cloud technologies, and scalable software design, and I enjoy building real-world solutions that create impact.</p>
     </div>
   </section>
 
-  <section class="features">
-    <div class="feature-card">
-      <h3>🚀 Projects</h3>
-      <p>Explore my latest projects and technical implementations</p>
-    </div>
-    <div class="feature-card">
-      <h3>💼 Skills</h3>
-      <p>Comprehensive overview of my technical expertise</p>
-    </div>
-    <div class="feature-card">
-      <h3>📝 Experience</h3>
-      <p>Learn about my professional journey and achievements</p>
-    </div>
-  </section>
-
-  <!-- Gallery Section -->
+  <!-- Gallery Section (Bottom, Full Width) -->
   <section class="gallery-section">
     <h2 class="section-title">Gallery</h2>
     <p class="section-subtitle">A visual showcase of my work and projects</p>

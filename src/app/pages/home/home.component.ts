@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,7 +12,15 @@ import { ContactService } from '../../services/contact.service';
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit, OnDestroy {
+  // Profile images carousel - Add your images to src/assets/images/ folder
+  profileImages: string[] = [
+    'assets/images/profile1.jpg',  // Add your profile images to src/assets/images/ folder
+    'assets/images/profile2.jpg',
+    'assets/images/profile3.jpg'
+  ];
+  currentProfileImageIndex = 0;
+  profileImageInterval: any;
   // Gallery items
   galleryItems: GalleryItem[] = [
     {
@@ -123,6 +131,26 @@ export class HomeComponent {
   submitError = '';
 
   constructor(private contactService: ContactService) {}
+
+  ngOnInit(): void {
+    // Start profile image carousel (changes every 3 seconds)
+    this.startProfileCarousel();
+  }
+
+  ngOnDestroy(): void {
+    // Clear intervals when component is destroyed
+    if (this.profileImageInterval) {
+      clearInterval(this.profileImageInterval);
+    }
+  }
+
+  startProfileCarousel(): void {
+    if (this.profileImages.length > 1) {
+      this.profileImageInterval = setInterval(() => {
+        this.currentProfileImageIndex = (this.currentProfileImageIndex + 1) % this.profileImages.length;
+      }, 3000); // Change every 3 seconds
+    }
+  }
 
   onSubmit(): void {
     if (!this.contactForm.name.trim() || !this.contactForm.email.trim() || !this.contactForm.message.trim()) {

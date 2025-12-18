@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { delay, tap } from 'rxjs/operators';
-import { PortfolioData, Profile, Skill, Project } from '../models/portfolio.models';
+import { PortfolioData, Profile, Skill, Project, PortfolioSection } from '../models/portfolio.models';
 
 @Injectable({ providedIn: 'root' })
 export class PortfolioService {
@@ -47,6 +47,13 @@ export class PortfolioService {
    */
   getProjects(): Project[] {
     return this.portfolioDataSignal().projects;
+  }
+
+  /**
+   * Get custom sections
+   */
+  getSections(): PortfolioSection[] {
+    return this.portfolioDataSignal().sections;
   }
 
   /**
@@ -125,6 +132,47 @@ export class PortfolioService {
   }
 
   /**
+   * Add or update custom portfolio section
+   */
+  saveSection(section: PortfolioSection): Observable<PortfolioSection> {
+    const current = this.portfolioDataSignal();
+    const existingIndex = current.sections.findIndex(s => s.id === section.id);
+
+    let updatedSections: PortfolioSection[];
+    if (existingIndex >= 0) {
+      updatedSections = [...current.sections];
+      updatedSections[existingIndex] = section;
+    } else {
+      updatedSections = [...current.sections, section];
+    }
+
+    this.portfolioDataSignal.set({ ...current, sections: updatedSections });
+    this.saveToStorage();
+    return of(section).pipe(delay(100));
+  }
+
+  /**
+   * Delete custom portfolio section
+   */
+  deleteSection(sectionId: string): Observable<boolean> {
+    const current = this.portfolioDataSignal();
+    const updatedSections = current.sections.filter(s => s.id !== sectionId);
+    this.portfolioDataSignal.set({ ...current, sections: updatedSections });
+    this.saveToStorage();
+    return of(true).pipe(delay(100));
+  }
+
+  /**
+   * Replace sections order/list (used for drag-and-drop reordering)
+   */
+  updateSections(sections: PortfolioSection[]): Observable<PortfolioSection[]> {
+    const current = this.portfolioDataSignal();
+    this.portfolioDataSignal.set({ ...current, sections: [...sections] });
+    this.saveToStorage();
+    return of(sections).pipe(delay(100));
+  }
+
+  /**
    * Delete project
    */
   deleteProject(projectId: string): Observable<boolean> {
@@ -198,6 +246,8 @@ export class PortfolioService {
           updatedAt: new Date('2024-03-10')
         }
       ]
+      ,
+      sections: []
     };
   }
 
@@ -215,6 +265,9 @@ export class PortfolioService {
           createdAt: new Date(p.createdAt),
           updatedAt: new Date(p.updatedAt)
         }));
+        if (!data.sections) {
+          data.sections = [];
+        }
         this.portfolioDataSignal.set(data);
       } catch (e) {
         console.error('Error loading portfolio data from storage', e);

@@ -1,0 +1,21 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: personal-ai-backend
+
+cors:
+  allowedOrigins:
+    - "http://localhost:4200"
+
+ai:
+  profileUrls:
+    - "https://your-portfolio-site.com"
+    - "https://github.com/your-username"
+
+  ollama:
+    baseUrl: "http://localhost:11434"
+    model: "llama3"
+
+

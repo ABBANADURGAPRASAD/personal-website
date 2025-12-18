@@ -5,6 +5,7 @@
       <a routerLink="/secure" class="btn-back">← Back to Dashboard</a>
       <div class="mode-indicator">
         <span class="badge secure">🔐 Admin Mode - Home Page</span>
+        <button class="btn-save-page" (click)="savePage()">💾 Save Page</button>
         <button class="btn-logout" (click)="logout()">Logout</button>
       </div>
     </div>
@@ -14,8 +15,19 @@
   <div class="top-section">
     <!-- Welcome Section (Left) -->
     <section class="welcome-section">
-      <h1>Welcome to My World</h1>
-      <p class="subtitle">Full Stack Developer | Spring Boot | Angular | AI</p>
+      <div class="heading-container">
+        <h1 *ngIf="!secureMode() || editingHeading() !== 'welcome'">{{ sectionHeadings().welcomeTitle }}</h1>
+          <div *ngIf="secureMode() && editingHeading() === 'welcome'" class="edit-heading-form">
+            <input [(ngModel)]="headingForm.welcomeTitle" placeholder="Welcome Title" class="styled-input heading-input" />
+            <input [(ngModel)]="headingForm.welcomeSubtitle" placeholder="Welcome Subtitle" class="styled-input heading-input" />
+            <div class="form-actions">
+              <button (click)="saveHeading()" class="btn-save">Save</button>
+              <button (click)="cancelEditHeading()" class="btn-cancel">Cancel</button>
+            </div>
+          </div>
+        <button *ngIf="secureMode() && editingHeading() !== 'welcome'" class="btn-edit-heading" (click)="startEditHeading('welcome')" title="Edit heading">✏️</button>
+      </div>
+      <p class="subtitle" *ngIf="!secureMode() || editingHeading() !== 'welcome'">{{ sectionHeadings().welcomeSubtitle }}</p>
     </section>
     
     <!-- Buttons Section (Right) -->
@@ -32,25 +44,70 @@
     <div class="profile-picture">
       <div class="profile-carousel">
         <img 
-          *ngFor="let img of profileImages; let i = index"
+          *ngFor="let img of profileImages(); let i = index"
           [src]="img" 
           [alt]="'Profile image ' + (i + 1)"
           [class.active]="i === currentProfileImageIndex"
           class="profile-image"
           (error)="$event.target.src='assets/images/placeholder.jpg'"
         />
-        <div class="profile-indicators" *ngIf="profileImages.length > 1">
+        <div class="profile-indicators" *ngIf="profileImages().length > 1">
           <span 
-            *ngFor="let img of profileImages; let i = index"
+            *ngFor="let img of profileImages(); let i = index"
             [class.active]="i === currentProfileImageIndex"
             class="indicator"
           ></span>
         </div>
       </div>
+      <div *ngIf="secureMode()" class="profile-image-actions">
+        <button *ngIf="!editingProfileImages()" class="btn-edit" (click)="startEditProfileImages()">✏️ Manage Images</button>
+        <div *ngIf="editingProfileImages()" class="edit-profile-images-form">
+          <div class="profile-images-list">
+            <div *ngFor="let img of profileImages(); let i = index" class="profile-image-item">
+              <img [src]="img" [alt]="'Image ' + (i + 1)" />
+              <button class="btn-delete-small" (click)="removeProfileImage(i)">🗑️</button>
+            </div>
+          </div>
+          <div class="add-image-form">
+            <div class="upload-section">
+              <label class="upload-label">
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  (change)="onProfileImageFileSelected($event)"
+                  class="file-input"
+                />
+                <span class="upload-button">📤 Upload Image</span>
+              </label>
+              <span class="or-divider">OR</span>
+              <input [(ngModel)]="newProfileImageUrl" placeholder="Enter Image URL" class="url-input" />
+            </div>
+            <div class="image-preview" *ngIf="newProfileImageUrl">
+              <img [src]="newProfileImageUrl" alt="Preview" />
+            </div>
+            <button (click)="addProfileImage()" class="btn-add-small" [disabled]="!newProfileImageUrl && !selectedProfileImageFile">+ Add</button>
+          </div>
+          <div class="form-actions">
+            <button (click)="cancelEditProfileImages()" class="btn-cancel">Done</button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="bio-card">
-      <h3>BIO DATA</h3>
-      <p>I am an Associate Software Engineer at Vision Waves with a strong foundation in Java, Spring Boot, REST APIs, and full-stack development. I hold a B.Tech in Artificial Intelligence & Machine Learning (CGPA: 8.2) and have hands-on experience building backend systems and AI-powered applications. I have presented my research on Brain Tumor Detection using ResNet at the 2nd International IEEE Conference, a milestone achievement in my academic journey. I am passionate about learning Spring AI, cloud technologies, and scalable software design, and I enjoy building real-world solutions that create impact.</p>
+      <div class="bio-header">
+        <h3>BIO DATA</h3>
+        <button *ngIf="secureMode() && !editingBio()" class="btn-edit" (click)="startEditBio()">✏️ Edit</button>
+      </div>
+      <div *ngIf="!editingBio()">
+        <p>{{ bioData() }}</p>
+      </div>
+      <div *ngIf="editingBio()" class="edit-bio-form">
+        <textarea [(ngModel)]="bioForm" rows="8" placeholder="Enter bio data" class="styled-textarea"></textarea>
+        <div class="form-actions">
+          <button (click)="saveBio()" class="btn-save">Save</button>
+          <button (click)="cancelEditBio()" class="btn-cancel">Cancel</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -58,11 +115,51 @@
   <section class="gallery-section">
     <div class="section-header">
       <div>
-        <h2 class="section-title">Gallery</h2>
-        <p class="section-subtitle">A visual showcase of my work and projects</p>
+        <div class="heading-container">
+          <h2 class="section-title" *ngIf="!secureMode() || editingHeading() !== 'gallery'">{{ sectionHeadings().galleryTitle }}</h2>
+          <div *ngIf="secureMode() && editingHeading() === 'gallery'" class="edit-heading-form">
+            <input [(ngModel)]="headingForm.galleryTitle" placeholder="Gallery Title" class="styled-input heading-input" />
+            <input [(ngModel)]="headingForm.gallerySubtitle" placeholder="Gallery Subtitle" class="styled-input heading-input" />
+            <div class="form-actions">
+              <button (click)="saveHeading()" class="btn-save">Save</button>
+              <button (click)="cancelEditHeading()" class="btn-cancel">Cancel</button>
+            </div>
+          </div>
+          <button *ngIf="secureMode() && editingHeading() !== 'gallery'" class="btn-edit-heading" (click)="startEditHeading('gallery')" title="Edit heading">✏️</button>
+        </div>
+        <p class="section-subtitle" *ngIf="!secureMode() || editingHeading() !== 'gallery'">{{ sectionHeadings().gallerySubtitle }}</p>
       </div>
-      <button *ngIf="secureMode() && !editingGallery()" class="btn-add" (click)="addGalleryItem()">+ Add Item</button>
+      <button *ngIf="secureMode() && !editingGallery() && !addingGalleryItem() && editingHeading() !== 'gallery'" class="btn-add" (click)="startAddGalleryItem()">+ Add Item</button>
     </div>
+    
+    <!-- Add New Gallery Item Form -->
+    <div *ngIf="secureMode() && addingGalleryItem()" class="edit-form add-item-form">
+      <h3>Add New Gallery Item</h3>
+      <input [(ngModel)]="galleryForm.title" placeholder="Title" class="styled-input" />
+      <div class="upload-section">
+        <label class="upload-label">
+          <input 
+            type="file" 
+            accept="image/*" 
+            (change)="onGalleryImageFileSelected($event)"
+            class="file-input"
+          />
+          <span class="upload-button">📤 Upload Image</span>
+        </label>
+        <span class="or-divider">OR</span>
+        <input [(ngModel)]="galleryForm.imageUrl" placeholder="Enter Image URL" class="styled-input url-input" />
+      </div>
+      <div class="image-preview" *ngIf="galleryForm.imageUrl">
+        <img [src]="galleryForm.imageUrl" alt="Preview" />
+      </div>
+      <input [(ngModel)]="galleryForm.description" placeholder="Description" class="styled-input" />
+      <input [(ngModel)]="galleryForm.category" placeholder="Category" class="styled-input" />
+      <div class="form-actions">
+        <button (click)="addGalleryItem()" class="btn-save" [disabled]="!galleryForm.imageUrl && !selectedGalleryImageFile">Save</button>
+        <button (click)="cancelAddGalleryItem()" class="btn-cancel">Cancel</button>
+      </div>
+    </div>
+
     <div class="gallery-grid">
       <div *ngFor="let item of galleryItems()" class="gallery-item">
         <div class="gallery-image">
@@ -79,10 +176,25 @@
         </div>
         <!-- Edit Form -->
         <div *ngIf="secureMode() && editingGallery() === item.id" class="edit-form">
-          <input [(ngModel)]="galleryForm.title" placeholder="Title" />
-          <input [(ngModel)]="galleryForm.imageUrl" placeholder="Image URL" />
-          <input [(ngModel)]="galleryForm.description" placeholder="Description" />
-          <input [(ngModel)]="galleryForm.category" placeholder="Category" />
+          <input [(ngModel)]="galleryForm.title" placeholder="Title" class="styled-input" />
+          <div class="upload-section">
+            <label class="upload-label">
+              <input 
+                type="file" 
+                accept="image/*" 
+                (change)="onGalleryImageFileSelected($event)"
+                class="file-input"
+              />
+              <span class="upload-button">📤 Upload Image</span>
+            </label>
+            <span class="or-divider">OR</span>
+            <input [(ngModel)]="galleryForm.imageUrl" placeholder="Enter Image URL" class="styled-input url-input" />
+          </div>
+          <div class="image-preview" *ngIf="galleryForm.imageUrl">
+            <img [src]="galleryForm.imageUrl" alt="Preview" />
+          </div>
+          <input [(ngModel)]="galleryForm.description" placeholder="Description" class="styled-input" />
+          <input [(ngModel)]="galleryForm.category" placeholder="Category" class="styled-input" />
           <div class="form-actions">
             <button (click)="saveGallery()" class="btn-save">Save</button>
             <button (click)="cancelEditGallery()" class="btn-cancel">Cancel</button>
@@ -96,35 +208,139 @@
   <section class="achievements-section">
     <div class="section-header">
       <div>
-        <h2 class="section-title">Achievements & Certifications</h2>
-        <p class="section-subtitle">Recognition and milestones in my career</p>
+        <div class="heading-container">
+          <h2 class="section-title" *ngIf="!secureMode() || editingHeading() !== 'achievements'">{{ sectionHeadings().achievementsTitle }}</h2>
+          <div *ngIf="secureMode() && editingHeading() === 'achievements'" class="edit-heading-form">
+            <input [(ngModel)]="headingForm.achievementsTitle" placeholder="Achievements Title" class="styled-input heading-input" />
+            <input [(ngModel)]="headingForm.achievementsSubtitle" placeholder="Achievements Subtitle" class="styled-input heading-input" />
+            <div class="form-actions">
+              <button (click)="saveHeading()" class="btn-save">Save</button>
+              <button (click)="cancelEditHeading()" class="btn-cancel">Cancel</button>
+            </div>
+          </div>
+          <button *ngIf="secureMode() && editingHeading() !== 'achievements'" class="btn-edit-heading" (click)="startEditHeading('achievements')" title="Edit heading">✏️</button>
+        </div>
+        <p class="section-subtitle" *ngIf="!secureMode() || editingHeading() !== 'achievements'">{{ sectionHeadings().achievementsSubtitle }}</p>
       </div>
-      <button *ngIf="secureMode() && !editingAchievement()" class="btn-add" (click)="addAchievement()">+ Add Achievement</button>
+      <button *ngIf="secureMode() && !editingAchievement() && !addingAchievement() && editingHeading() !== 'achievements'" class="btn-add" (click)="startAddAchievement()">+ Add Achievement</button>
     </div>
+    
+    <!-- Add New Achievement Form -->
+    <div *ngIf="secureMode() && addingAchievement()" class="edit-form add-item-form">
+      <h3>Add New Achievement</h3>
+      <input [(ngModel)]="achievementForm.title" placeholder="Title" class="styled-input" />
+      <input [(ngModel)]="achievementForm.description" placeholder="Description" class="styled-input" />
+      <input [(ngModel)]="achievementForm.icon" placeholder="Icon (emoji)" class="styled-input" />
+      <input [(ngModel)]="achievementForm.date" placeholder="Date" class="styled-input" />
+      <input [(ngModel)]="achievementForm.organization" placeholder="Organization" class="styled-input" />
+      <div class="upload-section">
+        <label class="upload-label">
+          <input 
+            type="file" 
+            accept="image/*" 
+            (change)="onAchievementBackgroundFileSelected($event)"
+            class="file-input"
+          />
+          <span class="upload-button">📤 Upload Background Image</span>
+        </label>
+        <span class="or-divider">OR</span>
+        <input [(ngModel)]="achievementForm.backgroundImage" placeholder="Enter Background Image URL" class="styled-input url-input" />
+      </div>
+      <div class="image-preview" *ngIf="achievementForm.backgroundImage">
+        <img [src]="achievementForm.backgroundImage" alt="Background Preview" />
+      </div>
+      <div class="form-actions">
+        <button (click)="addAchievement()" class="btn-save" [disabled]="!achievementForm.title">Save</button>
+        <button (click)="cancelAddAchievement()" class="btn-cancel">Cancel</button>
+      </div>
+    </div>
+
     <div class="achievements-grid">
-      <div *ngFor="let achievement of achievements()" class="achievement-card">
-        <div class="achievement-icon">{{ achievement.icon }}</div>
-        <h3>{{ achievement.title }}</h3>
-        <p>{{ achievement.description }}</p>
-        <div class="achievement-meta">
-          <span *ngIf="achievement.organization" class="organization">{{ achievement.organization }}</span>
-          <span *ngIf="achievement.date" class="date">{{ achievement.date }}</span>
+      <div *ngFor="let achievement of achievements()" class="achievement-item-wrapper">
+        <div class="achievement-card" [style.background-image]="achievement.backgroundImage ? 'url(' + achievement.backgroundImage + ')' : null">
+          <div class="achievement-content">
+            <div class="achievement-icon">{{ achievement.icon }}</div>
+            <h3>{{ achievement.title }}</h3>
+            <p>{{ achievement.description }}</p>
+            <div class="achievement-meta">
+              <span *ngIf="achievement.organization" class="organization">{{ achievement.organization }}</span>
+              <span *ngIf="achievement.date" class="date">{{ achievement.date }}</span>
+            </div>
+            <div *ngIf="secureMode()" class="achievement-actions">
+              <button class="btn-edit" (click)="startEditAchievement(achievement)">✏️ Edit</button>
+              <button class="btn-delete" (click)="deleteAchievement(achievement.id)">🗑️ Delete</button>
+            </div>
+          </div>
         </div>
-        <div *ngIf="secureMode()" class="achievement-actions">
-          <button class="btn-edit" (click)="startEditAchievement(achievement)">✏️ Edit</button>
-          <button class="btn-delete" (click)="deleteAchievement(achievement.id)">🗑️ Delete</button>
-        </div>
-        <!-- Edit Form -->
-        <div *ngIf="secureMode() && editingAchievement() === achievement.id" class="edit-form">
-          <input [(ngModel)]="achievementForm.title" placeholder="Title" />
-          <input [(ngModel)]="achievementForm.description" placeholder="Description" />
-          <input [(ngModel)]="achievementForm.icon" placeholder="Icon (emoji)" />
-          <input [(ngModel)]="achievementForm.date" placeholder="Date" />
-          <input [(ngModel)]="achievementForm.organization" placeholder="Organization" />
+        <!-- Edit Form - Outside the card for better visibility -->
+        <div *ngIf="secureMode() && editingAchievement() === achievement.id" class="edit-form achievement-edit-form">
+          <h4>Edit Achievement</h4>
+          <input [(ngModel)]="achievementForm.title" placeholder="Title" class="styled-input" />
+          <input [(ngModel)]="achievementForm.description" placeholder="Description" class="styled-input" />
+          <input [(ngModel)]="achievementForm.icon" placeholder="Icon (emoji)" class="styled-input" />
+          <input [(ngModel)]="achievementForm.date" placeholder="Date" class="styled-input" />
+          <input [(ngModel)]="achievementForm.organization" placeholder="Organization" class="styled-input" />
+          <div class="upload-section">
+            <label class="upload-label">
+              <input 
+                type="file" 
+                accept="image/*" 
+                (change)="onAchievementBackgroundFileSelected($event)"
+                class="file-input"
+              />
+              <span class="upload-button">📤 Upload Background Image</span>
+            </label>
+            <span class="or-divider">OR</span>
+            <input [(ngModel)]="achievementForm.backgroundImage" placeholder="Enter Background Image URL" class="styled-input url-input" />
+          </div>
+          <div class="image-preview" *ngIf="achievementForm.backgroundImage">
+            <img [src]="achievementForm.backgroundImage" alt="Background Preview" />
+          </div>
           <div class="form-actions">
             <button (click)="saveAchievement()" class="btn-save">Save</button>
             <button (click)="cancelEditAchievement()" class="btn-cancel">Cancel</button>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Custom Sections (Admin-created) -->
+  <section class="custom-sections" *ngIf="sections().length || secureMode()">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Additional Sections</h2>
+        <p class="section-subtitle">Create custom sections for anything else you want to highlight</p>
+      </div>
+      <button 
+        *ngIf="secureMode() && editingSection() !== 'new'" 
+        class="btn-add" 
+        (click)="startAddSection()">
+        + Add Section
+      </button>
+    </div>
+
+    <!-- Add/Edit Section Form -->
+    <div *ngIf="secureMode() && editingSection()" class="edit-form">
+      <h3>{{ editingSection() === 'new' ? 'Add' : 'Edit' }} Section</h3>
+      <input [(ngModel)]="sectionForm.title" placeholder="Section title" class="styled-input" />
+      <input [(ngModel)]="sectionForm.subtitle" placeholder="Section subtitle (optional)" class="styled-input" />
+      <textarea [(ngModel)]="sectionForm.content" rows="4" placeholder="Section content" class="styled-textarea"></textarea>
+      <div class="form-actions">
+        <button (click)="saveSection()" class="btn-save">Save</button>
+        <button (click)="cancelEditSection()" class="btn-cancel">Cancel</button>
+      </div>
+    </div>
+
+    <div class="custom-sections-grid">
+      <div *ngFor="let section of sections()" class="custom-section-card">
+        <h3>{{ section.title }}</h3>
+        <p *ngIf="section.subtitle" class="custom-section-subtitle">{{ section.subtitle }}</p>
+        <p class="custom-section-content">{{ section.content }}</p>
+
+        <div *ngIf="secureMode()" class="custom-section-actions">
+          <button class="btn-edit" (click)="startEditSection(section)">✏️ Edit</button>
+          <button class="btn-delete" (click)="deleteSection(section.id)">🗑️ Delete</button>
         </div>
       </div>
     </div>

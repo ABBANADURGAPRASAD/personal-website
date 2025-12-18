@@ -5,23 +5,32 @@
       <div class="header-info">
         <div class="bot-avatar">🤖</div>
         <div>
-          <h3>AI Assistant</h3>
-          <p class="status">Online</p>
+          <h3>DP's AI Chatbot</h3>
+          <p class="status">Agent Active • Strict Scope</p>
         </div>
       </div>
-      <button class="close-btn" (click)="toggleChat()">×</button>
+      <button class="close-btn" (click)="toggleChat()" aria-label="Close chat">×</button>
     </div>
 
-    <div class="chat-messages">
+    <div class="chat-messages" #messagesContainer>
       <div
         *ngFor="let message of messages()"
         class="message"
         [class.user-message]="message.isUser"
         [class.bot-message]="!message.isUser"
+        [class.refusal-message]="message.isRefusal"
       >
         <div class="message-content">
-          <p>{{ message.text }}</p>
-          <span class="message-time">{{ message.timestamp | date: 'short' }}</span>
+          <div class="message-header" *ngIf="message.isRefusal">
+            <span class="refusal-badge">⚠️ Out of Scope</span>
+          </div>
+          <p [innerHTML]="formatMessage(message.text)"></p>
+          <div class="message-footer">
+            <span class="message-time">{{ message.timestamp | date: 'short' }}</span>
+            <span class="message-sources" *ngIf="message.sources && message.sources.length > 0">
+              {{ message.sources.length }} source(s)
+            </span>
+          </div>
         </div>
       </div>
 
@@ -36,15 +45,24 @@
       </div>
     </div>
 
+    <!-- Agent Capabilities Section -->
+    <app-agent-capabilities></app-agent-capabilities>
+
     <div class="chat-input">
       <input
         type="text"
         [(ngModel)]="userInput"
         (keypress)="onKeyPress($event)"
-        placeholder="Type your message..."
+        placeholder="Ask about profile, projects, skills, or technologies..."
         [disabled]="isTyping()"
+        aria-label="Chat input"
       />
-      <button (click)="sendMessage()" [disabled]="!userInput.trim() || isTyping()">
+      <button 
+        (click)="sendMessage()" 
+        [disabled]="!userInput.trim() || isTyping()"
+        aria-label="Send message"
+        title="Send message"
+      >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="22" y1="2" x2="11" y2="13"></line>
           <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -54,7 +72,13 @@
   </div>
 
   <!-- Chat Button -->
-  <button class="chat-button" (click)="toggleChat()" [class.open]="isOpen()">
+  <button 
+    class="chat-button" 
+    (click)="toggleChat()" 
+    [class.open]="isOpen()"
+    aria-label="Toggle chat"
+    [attr.aria-expanded]="isOpen()"
+  >
     <span *ngIf="!isOpen()" class="chat-icon">💬</span>
     <span *ngIf="isOpen()" class="close-icon">×</span>
   </button>

@@ -1,60 +1,92 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface ChatMessage {
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-}
+import { ChatService } from '../../services/chat.service';
+import { ChatMessage, ChatRequest } from '../../models/chat.models';
+import { AgentCapabilitiesComponent } from '../agent-capabilities/agent-capabilities.component';
 
 @Component({
   selector: 'app-chatbot',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AgentCapabilitiesComponent],
   templateUrl: './chatbot.component.html',
   styleUrl: './chatbot.component.scss'
 })
-export class ChatbotComponent {
+export class ChatbotComponent implements OnInit, AfterViewChecked {
+  private chatService = inject(ChatService);
+  
+  @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
+  
   isOpen = signal<boolean>(false);
   messages = signal<ChatMessage[]>([
     {
-      text: 'Hello! I\'m your AI assistant. How can I help you today?',
+      text: 'Hello! I\'m LLA AI Bot, your personalized AI assistant. I can help you with information about Abbana Durga Prasad, including his profile, projects, skills, and technologies. How can I assist you today?',
       isUser: false,
-      timestamp: new Date()
+      timestamp: new Date(),
+      isRefusal: false
     }
   ]);
   userInput = '';
   isTyping = signal<boolean>(false);
+  conversationId?: string;
+  private shouldScroll = false;
+
+  ngOnInit(): void {
+    // Initialize conversation if needed
+  }
+
+  ngAfterViewChecked(): void {
+    if (this.shouldScroll) {
+      this.scrollToBottom();
+      this.shouldScroll = false;
+    }
+  }
 
   toggleChat(): void {
     this.isOpen.update(value => !value);
+    if (this.isOpen()) {
+      setTimeout(() => this.scrollToBottom(), 100);
+    }
   }
 
   sendMessage(): void {
     const message = this.userInput.trim();
-    if (!message) return;
+    if (!message || this.isTyping()) return;
 
     // Add user message
     this.messages.update(msgs => [...msgs, {
       text: message,
       isUser: true,
-      timestamp: new Date()
+      timestamp: new Date(),
+      isRefusal: false
     }]);
 
     this.userInput = '';
     this.isTyping.set(true);
+    this.shouldScroll = true;
 
-    // Simulate AI response (replace with actual AI service call)
-    setTimeout(() => {
-      const response = this.generateResponse(message);
+    // Call backend API via service
+    const request: ChatRequest = {
+      message: message,
+      conversationId: this.conversationId
+    };
+
+    this.chatService.sendMessage(request).subscribe(response => {
+      // Detect if this is a refusal message
+      const isRefusal = this.chatService.isRefusalMessage(response.reply);
+
+      // Add bot response
       this.messages.update(msgs => [...msgs, {
-        text: response,
+        text: response.reply,
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        isRefusal: isRefusal,
+        sources: response.sources
       }]);
+      
       this.isTyping.set(false);
-    }, 1000);
+      this.shouldScroll = true;
+    });
   }
 
   onKeyPress(event: KeyboardEvent): void {
@@ -64,36 +96,20 @@ export class ChatbotComponent {
     }
   }
 
-  private generateResponse(userMessage: string): string {
-    const lowerMessage = userMessage.toLowerCase();
-
-    // Simple response logic (replace with actual AI integration)
-    if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
-      return 'Hello! I\'m here to help you. You can ask me about the portfolio, projects, skills, or anything else!';
+  private scrollToBottom(): void {
+    try {
+      if (this.messagesContainer) {
+        const element = this.messagesContainer.nativeElement;
+        element.scrollTop = element.scrollHeight;
+      }
+    } catch (err) {
+      console.error('Error scrolling to bottom:', err);
     }
+  }
 
-    if (lowerMessage.includes('portfolio') || lowerMessage.includes('project')) {
-      return 'You can view the portfolio by clicking "View Portfolio" or navigating to /portfolio. The portfolio includes projects, skills, and profile information.';
-    }
-
-    if (lowerMessage.includes('skill') || lowerMessage.includes('technology')) {
-      return 'The portfolio showcases various skills including Java, Spring Boot, Angular, TypeScript, Python, and AI/ML technologies. Check out the portfolio page for details!';
-    }
-
-    if (lowerMessage.includes('contact') || lowerMessage.includes('email') || lowerMessage.includes('reach')) {
-      return 'You can contact through the contact form on the home page. Fill in your name, email, and message, and I\'ll get back to you!';
-    }
-
-    if (lowerMessage.includes('experience') || lowerMessage.includes('background')) {
-      return 'The portfolio includes detailed information about projects, achievements, and professional experience. Explore the portfolio and achievements sections!';
-    }
-
-    if (lowerMessage.includes('help')) {
-      return 'I can help you with:\n• Information about the portfolio\n• Questions about projects and skills\n• Contact information\n• Navigation help\n\nWhat would you like to know?';
-    }
-
-    // Default response
-    return 'Thank you for your message! I\'m an AI assistant helping with portfolio information. You can ask me about projects, skills, contact details, or anything else related to this portfolio.';
+  formatMessage(text: string): string {
+    // Simple formatting - can be enhanced for markdown or links
+    return text.replace(/\n/g, '<br>');
   }
 }
 

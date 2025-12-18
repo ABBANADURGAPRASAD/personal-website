@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PortfolioService } from '../../services/portfolio.service';
 import { AuthService } from '../../services/auth';
-import { Profile, Skill, Project } from '../../models/portfolio.models';
+import { Profile, Skill, Project, PortfolioSection } from '../../models/portfolio.models';
 
 @Component({
   selector: 'app-portfolio',
@@ -18,16 +18,20 @@ export class PortfolioComponent implements OnInit {
   profile = signal<Profile | null>(null);
   skills = signal<Skill[]>([]);
   projects = signal<Project[]>([]);
+  sections = signal<PortfolioSection[]>([]);
   
   // Edit states
   editingProfile = signal<boolean>(false);
   editingProject = signal<string | null>(null);
   editingSkill = signal<string | null>(null);
+  editingSection = signal<string | null>(null);
+  draggingSectionId = signal<string | null>(null);
   
   // Form models
   profileForm: Partial<Profile> = {};
   projectForm: Partial<Project> = {};
   skillForm: Partial<Skill> = {};
+  sectionForm: Partial<PortfolioSection> = {};
 
   // Computed values
   featuredProjects = computed(() => 
@@ -77,6 +81,7 @@ export class PortfolioComponent implements OnInit {
       this.profile.set(data.profile);
       this.skills.set(data.skills);
       this.projects.set(data.projects);
+      this.sections.set(data.sections || []);
     });
   }
 
@@ -94,6 +99,7 @@ export class PortfolioComponent implements OnInit {
 
   saveProfile(): void {
     if (!this.profile()) return;
+    if (this.secureMode() && !confirm('Do you want to save profile changes?')) return;
     this.portfolioService.updateProfile(this.profileForm).subscribe(updated => {
       this.profile.set(updated);
       this.editingProfile.set(false);
@@ -104,12 +110,14 @@ export class PortfolioComponent implements OnInit {
   // Project editing
   startEditProject(project: Project): void {
     if (!this.secureMode()) return;
+    if (!confirm('Do you want to edit this project?')) return;
     this.projectForm = { ...project };
     this.editingProject.set(project.id);
   }
 
   startAddProject(): void {
     if (!this.secureMode()) return;
+    if (!confirm('Do you want to create a new project?')) return;
     this.projectForm = {
       title: '',
       description: '',
@@ -126,6 +134,7 @@ export class PortfolioComponent implements OnInit {
 
   saveProject(): void {
     if (!this.projectForm.title || !this.projectForm.description) return;
+    if (this.secureMode() && !confirm('Do you want to save this project?')) return;
     
     const project: Project = {
       id: this.editingProject() === 'new' 
@@ -149,7 +158,7 @@ export class PortfolioComponent implements OnInit {
   }
 
   deleteProject(projectId: string): void {
-    if (!this.secureMode() || !confirm('Are you sure you want to delete this project?')) return;
+    if (!this.secureMode() || !confirm('Are you sure you want to remove this project?')) return;
     this.portfolioService.deleteProject(projectId).subscribe(() => {
       this.loadPortfolioData();
     });
@@ -158,12 +167,14 @@ export class PortfolioComponent implements OnInit {
   // Skill editing
   startEditSkill(skill: Skill): void {
     if (!this.secureMode()) return;
+    if (!confirm('Do you want to edit this skill?')) return;
     this.skillForm = { ...skill };
     this.editingSkill.set(skill.id);
   }
 
   startAddSkill(): void {
     if (!this.secureMode()) return;
+    if (!confirm('Do you want to create a new skill?')) return;
     this.skillForm = {
       name: '',
       category: 'other',
@@ -179,6 +190,7 @@ export class PortfolioComponent implements OnInit {
 
   saveSkill(): void {
     if (!this.skillForm.name) return;
+    if (this.secureMode() && !confirm('Do you want to save this skill?')) return;
     
     const skill: Skill = {
       id: this.editingSkill() === 'new' 
@@ -197,9 +209,97 @@ export class PortfolioComponent implements OnInit {
   }
 
   deleteSkill(skillId: string): void {
-    if (!this.secureMode() || !confirm('Are you sure you want to delete this skill?')) return;
+    if (!this.secureMode() || !confirm('Are you sure you want to remove this skill?')) return;
     this.portfolioService.deleteSkill(skillId).subscribe(() => {
       this.loadPortfolioData();
+    });
+  }
+
+  // Section editing
+  startAddSection(): void {
+    if (!this.secureMode()) return;
+    if (!confirm('Do you want to create a new section?')) return;
+    this.sectionForm = {
+      title: '',
+      subtitle: '',
+      content: ''
+    };
+    this.editingSection.set('new');
+  }
+
+  startEditSection(section: PortfolioSection): void {
+    if (!this.secureMode()) return;
+    if (!confirm('Do you want to edit this section?')) return;
+    this.sectionForm = { ...section };
+    this.editingSection.set(section.id);
+  }
+
+  cancelEditSection(): void {
+    this.editingSection.set(null);
+    this.sectionForm = {};
+  }
+
+  saveSection(): void {
+    if (!this.sectionForm.title || !this.sectionForm.content) return;
+    if (this.secureMode() && !confirm('Do you want to save this section?')) return;
+
+    const section: PortfolioSection = {
+      id: this.editingSection() === 'new'
+        ? Date.now().toString()
+        : this.sectionForm.id!,
+      title: this.sectionForm.title,
+      subtitle: this.sectionForm.subtitle,
+      content: this.sectionForm.content
+    };
+
+    this.portfolioService.saveSection(section).subscribe(() => {
+      this.loadPortfolioData();
+      this.cancelEditSection();
+    });
+  }
+
+  deleteSection(sectionId: string): void {
+    if (!this.secureMode() || !confirm('Are you sure you want to remove this section?')) return;
+    this.portfolioService.deleteSection(sectionId).subscribe(() => {
+      this.loadPortfolioData();
+    });
+  }
+
+  // Drag-and-drop reorder handlers
+  onDragStart(sectionId: string): void {
+    if (!this.secureMode()) return;
+    if (!confirm('Do you want to move this section?')) return;
+    this.draggingSectionId.set(sectionId);
+  }
+
+  onDragEnd(): void {
+    this.draggingSectionId.set(null);
+  }
+
+  onDragOver(event: DragEvent, targetId: string): void {
+    if (!this.secureMode()) return;
+    event.preventDefault();
+    if (this.draggingSectionId() === targetId) return;
+  }
+
+  onDrop(event: DragEvent, targetId: string): void {
+    if (!this.secureMode()) return;
+    event.preventDefault();
+
+    const sourceId = this.draggingSectionId();
+    if (!sourceId || sourceId === targetId) return;
+
+    const list = [...this.sections()];
+    const sourceIndex = list.findIndex(s => s.id === sourceId);
+    const targetIndex = list.findIndex(s => s.id === targetId);
+    if (sourceIndex === -1 || targetIndex === -1) return;
+
+    const [moved] = list.splice(sourceIndex, 1);
+    list.splice(targetIndex, 0, moved);
+
+    this.sections.set(list);
+    this.portfolioService.updateSections(list).subscribe(() => {
+      this.draggingSectionId.set(null);
     });
   }
 
@@ -215,7 +315,19 @@ export class PortfolioComponent implements OnInit {
 
   removeTechnology(index: number): void {
     if (this.projectForm.technologies) {
+      if (this.secureMode() && !confirm('Are you sure you want to remove this technology?')) {
+        return;
+      }
       this.projectForm.technologies.splice(index, 1);
+    }
+  }
+
+  // Explicit "Save Page" action (main save button)
+  savePage(): void {
+    if (!this.secureMode()) return;
+    if (confirm('Do you want to save all Portfolio page changes?')) {
+      // All edits are already persisted on save of each form; this gives explicit feedback.
+      alert('Portfolio page saved successfully.');
     }
   }
 

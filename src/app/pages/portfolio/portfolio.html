@@ -5,6 +5,7 @@
       <a routerLink="/" class="btn-back">← Back to Home</a>
       <div class="mode-indicator" *ngIf="secureMode()">
         <span class="badge secure">🔐 Admin Mode</span>
+        <button class="btn-save-page" (click)="savePage()">💾 Save Page</button>
         <button class="btn-logout" (click)="logout()">Logout</button>
       </div>
       <div class="mode-indicator" *ngIf="!secureMode()">
@@ -226,6 +227,63 @@
         <div *ngIf="secureMode()" class="project-actions">
           <button class="btn-edit" (click)="startEditProject(project)">✏️ Edit</button>
           <button class="btn-delete" (click)="deleteProject(project.id)">🗑️ Delete</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Custom Sections -->
+  <section class="custom-sections" *ngIf="sections().length || secureMode()">
+    <div class="section-header">
+      <h2>Additional Sections</h2>
+      <button
+        *ngIf="secureMode() && editingSection() !== 'new'"
+        class="btn-add"
+        (click)="startAddSection()">
+        ➕ Add Section
+      </button>
+    </div>
+
+    <!-- Add/Edit Section Form -->
+    <div *ngIf="editingSection() && secureMode()" class="edit-form">
+      <h3>{{ editingSection() === 'new' ? 'Add' : 'Edit' }} Section</h3>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" [(ngModel)]="sectionForm.title" />
+      </div>
+      <div class="form-group">
+        <label>Subtitle</label>
+        <input type="text" [(ngModel)]="sectionForm.subtitle" />
+      </div>
+      <div class="form-group">
+        <label>Content</label>
+        <textarea [(ngModel)]="sectionForm.content" rows="4"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn-save" (click)="saveSection()">Save</button>
+        <button class="btn-cancel" (click)="cancelEditSection()">Cancel</button>
+      </div>
+    </div>
+
+    <div class="custom-sections-grid">
+      <div
+        *ngFor="let section of sections()"
+        class="custom-section-card"
+        [attr.draggable]="secureMode() ? true : null"
+        (dragstart)="onDragStart(section.id)"
+        (dragend)="onDragEnd()"
+        (dragover)="onDragOver($event, section.id)"
+        (drop)="onDrop($event, section.id)"
+      >
+        <div class="custom-section-header">
+          <h3>{{ section.title }}</h3>
+          <p *ngIf="section.subtitle" class="custom-section-subtitle">{{ section.subtitle }}</p>
+        </div>
+        <p class="custom-section-content">{{ section.content }}</p>
+
+        <div *ngIf="secureMode()" class="custom-section-actions">
+          <button class="btn-edit" (click)="startEditSection(section)">✏️ Edit</button>
+          <button class="btn-delete" (click)="deleteSection(section.id)">🗑️ Delete</button>
         </div>
       </div>
     </div>

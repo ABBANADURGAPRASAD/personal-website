@@ -36,9 +36,17 @@ export interface Project {
   updatedAt: Date;
 }
 
+export interface PortfolioSection {
+  id: string;
+  title: string;
+  subtitle?: string;
+  content: string;
+}
+
 export interface PortfolioData {
   profile: Profile;
   skills: Skill[];
   projects: Project[];
+  sections: PortfolioSection[];
 }
 

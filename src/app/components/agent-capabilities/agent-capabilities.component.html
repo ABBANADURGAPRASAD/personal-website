@@ -1,0 +1,164 @@
+<div class="agent-capabilities">
+  <div class="capabilities-header" (click)="toggleCapabilities()">
+    <div class="header-left">
+      <h3>Capabilities / Next Steps</h3>
+      <button 
+        class="toggle-arrow" 
+        [attr.aria-expanded]="isExpanded()" 
+        aria-label="Toggle capabilities"
+        (click)="$event.stopPropagation()"
+      >
+        <svg 
+          *ngIf="isExpanded()" 
+          width="16" 
+          height="16" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          stroke-width="2"
+        >
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+        <svg 
+          *ngIf="!isExpanded()" 
+          width="16" 
+          height="16" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          stroke-width="2"
+        >
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+    </div>
+    <div class="agent-status-badge" [class.active]="agentStatus().isActive" (click)="$event.stopPropagation()">
+      <span class="status-dot"></span>
+      <span>{{ agentStatus().isActive ? 'Active Agent' : 'Inactive' }}</span>
+      <span class="scope-badge" *ngIf="agentStatus().strictScopeEnabled">Strict Scope</span>
+    </div>
+  </div>
+
+  <div class="capabilities-list" [class.collapsed]="!isExpanded()">
+    <button
+      *ngFor="let capability of capabilities()"
+      class="capability-item"
+      (click)="capability.action()"
+      [title]="capability.description"
+    >
+      <span class="capability-icon">{{ capability.icon }}</span>
+      <div class="capability-content">
+        <span class="capability-title">{{ capability.title }}</span>
+        <span class="capability-description">{{ capability.description }}</span>
+      </div>
+    </button>
+  </div>
+
+  <!-- Profile Data Modal -->
+  <div class="modal-overlay" *ngIf="showProfileData()" (click)="closeProfileData()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Profile Data</h3>
+        <button class="close-btn" (click)="closeProfileData()">×</button>
+      </div>
+      <div class="modal-body" *ngIf="profileData()">
+        <div class="profile-section">
+          <h4>{{ profileData()!.name }}</h4>
+          <p class="professional-identity">{{ profileData()!.professionalIdentity }}</p>
+        </div>
+        
+        <div class="profile-section" *ngIf="profileData()!.technologies?.length">
+          <h5>Technologies</h5>
+          <ul>
+            <li *ngFor="let tech of profileData()!.technologies">{{ tech }}</li>
+          </ul>
+        </div>
+
+        <div class="profile-section" *ngIf="profileData()!.skills?.length">
+          <h5>Skills</h5>
+          <ul>
+            <li *ngFor="let skill of profileData()!.skills">{{ skill }}</li>
+          </ul>
+        </div>
+
+        <div class="profile-section" *ngIf="profileData()!.projects?.length">
+          <h5>Projects</h5>
+          <ul>
+            <li *ngFor="let project of profileData()!.projects">{{ project }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technology Stack Modal -->
+  <div class="modal-overlay" *ngIf="showTechStack()" (click)="closeTechStack()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Technology Stack</h3>
+        <button class="close-btn" (click)="closeTechStack()">×</button>
+      </div>
+      <div class="modal-body" *ngIf="technologyStack()">
+        <div class="tech-section" *ngIf="technologyStack()!.backend?.length">
+          <h5>Backend</h5>
+          <div class="tech-tags">
+            <span class="tech-tag" *ngFor="let tech of technologyStack()!.backend">{{ tech }}</span>
+          </div>
+        </div>
+
+        <div class="tech-section" *ngIf="technologyStack()!.aiMl?.length">
+          <h5>AI/ML</h5>
+          <div class="tech-tags">
+            <span class="tech-tag" *ngFor="let tech of technologyStack()!.aiMl">{{ tech }}</span>
+          </div>
+        </div>
+
+        <div class="tech-section" *ngIf="technologyStack()!.databases?.length">
+          <h5>Databases</h5>
+          <div class="tech-tags">
+            <span class="tech-tag" *ngFor="let tech of technologyStack()!.databases">{{ tech }}</span>
+          </div>
+        </div>
+
+        <div class="tech-section" *ngIf="technologyStack()!.frontend?.length">
+          <h5>Frontend</h5>
+          <div class="tech-tags">
+            <span class="tech-tag" *ngFor="let tech of technologyStack()!.frontend">{{ tech }}</span>
+          </div>
+        </div>
+
+        <div class="tech-section" *ngIf="technologyStack()!.tools?.length">
+          <h5>Development Tools</h5>
+          <div class="tech-tags">
+            <span class="tech-tag" *ngFor="let tech of technologyStack()!.tools">{{ tech }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Switcher Modal -->
+  <div class="modal-overlay" *ngIf="showProfileSwitcher()" (click)="showProfileSwitcher.set(false)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Switch Profile</h3>
+        <button class="close-btn" (click)="showProfileSwitcher.set(false)">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="profile-list">
+          <button
+            *ngFor="let profile of availableProfiles()"
+            class="profile-item"
+            [class.active]="agentStatus().currentProfile === profile"
+            (click)="switchProfile(profile)"
+          >
+            {{ profile }}
+            <span *ngIf="agentStatus().currentProfile === profile" class="current-badge">Current</span>
+          </button>
+        </div>
+        <p class="info-text">Multiple profile support coming soon</p>
+      </div>
+    </div>
+  </div>
+</div>
+

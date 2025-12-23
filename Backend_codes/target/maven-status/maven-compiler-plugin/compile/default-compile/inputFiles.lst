@@ -4,5 +4,6 @@
 /Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/dto/ChatRequest.java
 /Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/dto/ChatResponse.java
 /Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/llm/LocalLlmClient.java
+/Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/service/ProfileDataService.java
 /Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/service/RagChatService.java
 /Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/service/WebDataIndexer.java

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GalleryItem, Achievement, ContactForm, HomeSection, HomePageData } from '../../models/home.models';
@@ -187,7 +187,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(
     private contactService: ContactService,
     private route: ActivatedRoute,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -642,6 +643,11 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.authService.logout();
+    this.router.navigate(['/login']).then(() => {
+      console.log('Logged out successfully');
+    }).catch(error => {
+      console.error('Error navigating to login:', error);
+    });
   }
 
   // Bio Data editing

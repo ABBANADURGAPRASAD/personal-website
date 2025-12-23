@@ -3,7 +3,6 @@ package com.example.demo.llm;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -34,8 +33,7 @@ public class LocalLlmClient {
     ) {}
 
     try {
-      // Ollama returns NDJSON (newline-delimited JSON) even when stream=false
-      // We need to read the response as text and parse each line
+      // When stream=false, Ollama returns a single JSON object
       String responseText = webClient.post()
           .uri("/api/generate")
           .bodyValue(new GenerateRequest(model, systemPrompt, prompt, false))
@@ -47,10 +45,16 @@ public class LocalLlmClient {
         return "Error: No response from LLM";
       }
 
-      // Parse NDJSON - each line is a JSON object
-      String fullResponse = parseNdJsonResponse(responseText);
+      // Parse JSON and extract only the "response" field
+      JsonNode jsonNode = objectMapper.readTree(responseText);
+      if (jsonNode.has("response")) {
+        String response = jsonNode.get("response").asText();
+        if (response != null && !response.trim().isEmpty()) {
+          return response.trim();
+        }
+      }
 
-      return fullResponse.length() > 0 ? fullResponse : "Error: No response from LLM";
+      return "Error: No response field found in LLM response";
     } catch (Exception e) {
       e.printStackTrace();
       return "Error: Failed to generate response - " + e.getMessage();
@@ -60,34 +64,6 @@ public class LocalLlmClient {
   // Overloaded method for backward compatibility
   public String generate(String prompt) {
     return generate(prompt, null);
-  }
-
-  private String parseNdJsonResponse(String responseText) {
-    StringBuilder fullResponse = new StringBuilder();
-    String[] lines = responseText.split("\n");
-    
-    for (String line : lines) {
-      if (line != null && !line.trim().isEmpty()) {
-        String chunk = extractResponseChunk(line);
-        if (chunk != null) {
-          fullResponse.append(chunk);
-        }
-      }
-    }
-    
-    return fullResponse.toString();
-  }
-
-  private String extractResponseChunk(String jsonLine) {
-    try {
-      JsonNode jsonNode = objectMapper.readTree(jsonLine);
-      if (jsonNode.has("response")) {
-        return jsonNode.get("response").asText();
-      }
-    } catch (IOException e) {
-      // Skip malformed JSON lines
-    }
-    return null;
   }
 }
 

@@ -18,6 +18,8 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   
   isOpen = signal<boolean>(false);
+  isMinimized = signal<boolean>(false);
+  isFullscreen = signal<boolean>(false);
   messages = signal<ChatMessage[]>([
     {
       text: 'Hello! I\'m LLA AI Bot, your personalized AI assistant. I can help you with information about Abbana Durga Prasad, including his profile, projects, skills, and technologies. How can I assist you today?',
@@ -45,6 +47,29 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   toggleChat(): void {
     this.isOpen.update(value => !value);
     if (this.isOpen()) {
+      this.isMinimized.set(false);
+      setTimeout(() => this.scrollToBottom(), 100);
+    } else {
+      this.isFullscreen.set(false);
+      this.isMinimized.set(false);
+    }
+  }
+
+  minimizeChat(): void {
+    this.isMinimized.set(true);
+    this.isFullscreen.set(false);
+  }
+
+  maximizeChat(): void {
+    this.isMinimized.set(false);
+    this.isFullscreen.set(false);
+    setTimeout(() => this.scrollToBottom(), 100);
+  }
+
+  toggleFullscreen(): void {
+    this.isFullscreen.update(value => !value);
+    this.isMinimized.set(false);
+    if (this.isFullscreen()) {
       setTimeout(() => this.scrollToBottom(), 100);
     }
   }

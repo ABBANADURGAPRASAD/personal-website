@@ -1,6 +1,11 @@
 <div class="chatbot-container">
   <!-- Chat Window -->
-  <div class="chat-window" [class.open]="isOpen()">
+  <div 
+    class="chat-window" 
+    [class.open]="isOpen()"
+    [class.minimized]="isMinimized()"
+    [class.fullscreen]="isFullscreen()"
+  >
     <div class="chat-header">
       <div class="header-info">
         <div class="bot-avatar">🤖</div>
@@ -9,10 +14,57 @@
           <p class="status">Agent Active • Strict Scope</p>
         </div>
       </div>
-      <button class="close-btn" (click)="toggleChat()" aria-label="Close chat">×</button>
+      <div class="header-actions">
+        <button 
+          *ngIf="!isMinimized()" 
+          class="header-btn minimize-btn" 
+          (click)="minimizeChat()" 
+          aria-label="Minimize chat"
+          title="Minimize"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+        <button 
+          *ngIf="isMinimized()" 
+          class="header-btn maximize-btn" 
+          (click)="maximizeChat()" 
+          aria-label="Maximize chat"
+          title="Maximize"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
+        </button>
+        <button 
+          *ngIf="!isMinimized()" 
+          class="header-btn fullscreen-btn" 
+          (click)="toggleFullscreen()" 
+          aria-label="Toggle fullscreen"
+          [title]="isFullscreen() ? 'Exit Fullscreen' : 'Fullscreen'"
+        >
+          <svg *ngIf="!isFullscreen()" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
+          <svg *ngIf="isFullscreen()" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 9 3 9 3 15"></polyline>
+            <polyline points="15 15 21 15 21 9"></polyline>
+            <line x1="3" y1="9" x2="10" y2="16"></line>
+            <line x1="21" y1="15" x2="14" y2="8"></line>
+          </svg>
+        </button>
+        <button class="header-btn close-btn" (click)="toggleChat()" aria-label="Close chat" title="Close">×</button>
+      </div>
     </div>
 
-    <div class="chat-messages" #messagesContainer>
+    <div class="chat-messages" #messagesContainer [class.hidden]="isMinimized()">
       <div
         *ngFor="let message of messages()"
         class="message"
@@ -46,9 +98,9 @@
     </div>
 
     <!-- Agent Capabilities Section -->
-    <app-agent-capabilities></app-agent-capabilities>
+    <app-agent-capabilities [class.hidden]="isMinimized()"></app-agent-capabilities>
 
-    <div class="chat-input">
+    <div class="chat-input" [class.hidden]="isMinimized()">
       <input
         type="text"
         [(ngModel)]="userInput"

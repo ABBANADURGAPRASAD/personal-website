@@ -1,9 +1,13 @@
 /Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/DemoApplication.java
 /Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/config/CorsConfig.java
 /Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/controller/ChatController.java
+/Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/controller/ContactController.java
 /Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/dto/ChatRequest.java
 /Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/dto/ChatResponse.java
+/Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/dto/ContactRequest.java
+/Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/dto/ContactResponse.java
 /Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/llm/LocalLlmClient.java
+/Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/service/EmailService.java
 /Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/service/ProfileDataService.java
 /Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/service/RagChatService.java
 /Users/ent-00210/Desktop/personal pro/personal-website/Backend_codes/src/main/java/com/example/demo/service/WebDataIndexer.java

@@ -72,6 +72,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   selectedProfileImageFile: File | null = null;
   selectedGalleryImageFile: File | null = null;
   selectedAchievementBackgroundFile: File | null = null;
+  imageErrors = new Set<string>(); // Track images that failed to load
   // Gallery items - using signal for reactivity
   galleryItems = signal<GalleryItem[]>([
     {
@@ -216,8 +217,30 @@ export class HomeComponent implements OnInit, OnDestroy {
   startProfileCarousel(): void {
     if (this.profileImages().length > 1) {
       this.profileImageInterval = setInterval(() => {
-        this.currentProfileImageIndex = (this.currentProfileImageIndex + 1) % this.profileImages().length;
+        const validImages = this.profileImages().filter(img => !this.imageErrors.has(img));
+        if (validImages.length > 0) {
+          const currentValidIndex = validImages.findIndex(img => 
+            img === this.profileImages()[this.currentProfileImageIndex]
+          );
+          const nextIndex = (currentValidIndex + 1) % validImages.length;
+          this.currentProfileImageIndex = this.profileImages().indexOf(validImages[nextIndex]);
+        }
       }, 3000); // Change every 3 seconds
+    }
+  }
+
+  handleImageError(event: Event, imageUrl: string): void {
+    // Mark this image as failed to prevent infinite loops
+    this.imageErrors.add(imageUrl);
+    const img = event.target as HTMLImageElement;
+    // Hide the image instead of trying to load a placeholder
+    img.style.display = 'none';
+    
+    // If all images failed, show a default placeholder div
+    const validImages = this.profileImages().filter(img => !this.imageErrors.has(img));
+    if (validImages.length === 0) {
+      // All images failed - could show a default avatar or message
+      console.warn('All profile images failed to load');
     }
   }
 

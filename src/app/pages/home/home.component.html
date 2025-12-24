@@ -48,8 +48,9 @@
           [src]="img" 
           [alt]="'Profile image ' + (i + 1)"
           [class.active]="i === currentProfileImageIndex"
+          [class.hidden]="imageErrors.has(img)"
           class="profile-image"
-          (error)="$event.target.src='assets/images/placeholder.jpg'"
+          (error)="handleImageError($event, img)"
         />
         <div class="profile-indicators" *ngIf="profileImages().length > 1">
           <span 

@@ -18,4 +18,28 @@ ai:
     baseUrl: "http://localhost:11434"
     model: "llama3"
 
+# Email Configuration
+mail:
+  from: "abbanadurgaprasad9390@gmail.com"  # Your email address (sender)
+  to: "abbanadurgaprasad9390@gmail.com"      # Your email address (recipient for notifications)
+  subject:
+    prefix: "Portfolio Contact Form: "
+
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:your-email@gmail.com}  # Use environment variable or set here
+    password: ${MAIL_PASSWORD:your-app-password}      # Use environment variable for security
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
 

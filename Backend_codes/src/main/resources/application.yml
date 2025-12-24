@@ -4,10 +4,28 @@ server:
 spring:
   application:
     name: personal-ai-backend
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:abbanadurgaprasad9390@gmail.com}  # Use environment variable or set here
+    password: ${MAIL_PASSWORD:nmiofxzlgcallpqq}      # Use environment variable for security
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 cors:
   allowedOrigins:
     - "http://localhost:4200"
+    - "http://localhost:63535"
+    - "http://127.0.0.1:4200"
+    - "http://127.0.0.1:63535"
 
 ai:
   profileUrls:
@@ -24,22 +42,5 @@ mail:
   to: "abbanadurgaprasad9390@gmail.com"      # Your email address (recipient for notifications)
   subject:
     prefix: "Portfolio Contact Form: "
-
-spring:
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${MAIL_USERNAME:your-email@gmail.com}  # Use environment variable or set here
-    password: ${MAIL_PASSWORD:your-app-password}      # Use environment variable for security
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
 
 

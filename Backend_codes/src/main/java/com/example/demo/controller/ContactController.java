@@ -6,6 +6,7 @@ import com.example.demo.service.EmailService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/contact")
+@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:63535", "http://127.0.0.1:4200", "http://127.0.0.1:63535"}, 
+             allowedHeaders = "*", 
+             methods = {org.springframework.web.bind.annotation.RequestMethod.POST, 
+                       org.springframework.web.bind.annotation.RequestMethod.OPTIONS})
 public class ContactController {
 
   private final EmailService emailService;

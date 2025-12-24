@@ -18,9 +18,26 @@ public class CorsConfig {
   public CorsFilter corsFilter() {
     CorsConfiguration config = new CorsConfiguration();
     config.setAllowCredentials(true);
-    config.setAllowedOrigins(allowedOrigins);
+    
+    // For development: allow all localhost ports using patterns
+    // This is more flexible than listing every port
+    config.addAllowedOriginPattern("http://localhost:*");
+    config.addAllowedOriginPattern("http://127.0.0.1:*");
+    
+    // Also add specific configured origins as backup
+    if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
+      allowedOrigins.forEach(origin -> {
+        if (!origin.contains("*")) {
+          config.addAllowedOrigin(origin);
+        }
+      });
+    }
+    
     config.addAllowedHeader("*");
     config.addAllowedMethod("*");
+    config.addAllowedMethod("OPTIONS");
+    config.addExposedHeader("*");
+    config.setMaxAge(3600L); // Cache preflight for 1 hour
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", config);

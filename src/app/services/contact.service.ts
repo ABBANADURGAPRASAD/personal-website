@@ -18,11 +18,21 @@ export class ContactService {
    * Send contact message to backend
    */
   sendMessage(contactForm: ContactForm): Observable<boolean> {
-    return this.http.post<ContactResponse>(this.API_URL, contactForm)
+    return this.http.post<ContactResponse>(this.API_URL, contactForm, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
       .pipe(
-        map(response => response.success),
+        map(response => {
+          // Handle both 'success' and 'isSuccess' property names
+          return response.success !== undefined ? response.success : (response as any).isSuccess || false;
+        }),
         catchError(error => {
           console.error('Error sending contact message:', error);
+          if (error.status === 0) {
+            console.error('CORS error or network issue. Make sure backend is running and CORS is configured.');
+          }
           return of(false);
         })
       );

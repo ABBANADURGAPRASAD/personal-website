@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GalleryItem, Achievement, ContactForm, HomeSection, HomePageData } from '../../models/home.models';
 import { ContactService } from '../../services/contact.service';
+import { ImageUploadService } from '../../services/image-upload.service';
 import { AuthService } from '../../services/auth';
 
 @Component({
@@ -60,11 +61,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     achievementsSubtitle: string;
   }> = {};
   
-  // Profile images carousel - Add your images to src/assets/images/ folder
+  // Profile images carousel - Images from src/assets/images/profile folder
   profileImages = signal<string[]>([
-    'assets/images/profile1.jpg',  // Add your profile images to src/assets/images/ folder
-    'assets/images/profile2.jpg',
-    'assets/images/profile3.jpg'
+    'assets/images/profile/profile2.png',
+    'assets/images/profile/profile3.jpeg'
   ]);
   currentProfileImageIndex = 0;
   profileImageInterval: any;
@@ -72,48 +72,49 @@ export class HomeComponent implements OnInit, OnDestroy {
   selectedProfileImageFile: File | null = null;
   selectedGalleryImageFile: File | null = null;
   selectedAchievementBackgroundFile: File | null = null;
-  imageErrors = new Set<string>(); // Track images that failed to load
+  uploadingImage = signal<boolean>(false); // Track upload status
   // Gallery items - using signal for reactivity
+  // Add your gallery images to src/assets/images/gallery/ folder and update imageUrl paths
   galleryItems = signal<GalleryItem[]>([
     {
       id: '1',
       title: 'Project Showcase',
-      imageUrl: 'https://via.placeholder.com/400x300/667eea/ffffff?text=Project+1',
+      imageUrl: '', // Add image path: 'assets/images/gallery/project1.jpg'
       description: 'Subscription Management System',
       category: 'Web Application'
     },
     {
       id: '2',
       title: 'AI Chatbot',
-      imageUrl: 'https://via.placeholder.com/400x300/764ba2/ffffff?text=AI+Chatbot',
+      imageUrl: '', // Add image path: 'assets/images/gallery/chatbot.jpg'
       description: 'Spring AI Chatbot Implementation',
       category: 'AI/ML'
     },
     {
       id: '3',
       title: 'Medical Imaging',
-      imageUrl: 'https://via.placeholder.com/400x300/10b981/ffffff?text=Brain+Tumor+Detection',
+      imageUrl: '', // Add image path: 'assets/images/gallery/medical.jpg'
       description: 'ResNet-based Brain Tumor Detection',
       category: 'Deep Learning'
     },
     {
       id: '4',
       title: 'Full Stack App',
-      imageUrl: 'https://via.placeholder.com/400x300/f59e0b/ffffff?text=Full+Stack',
+      imageUrl: '', // Add image path: 'assets/images/gallery/fullstack.jpg'
       description: 'Modern Web Application',
       category: 'Web Development'
     },
     {
       id: '5',
       title: 'API Development',
-      imageUrl: 'https://via.placeholder.com/400x300/ef4444/ffffff?text=API+Design',
+      imageUrl: '', // Add image path: 'assets/images/gallery/api.jpg'
       description: 'RESTful API Architecture',
       category: 'Backend'
     },
     {
       id: '6',
       title: 'UI/UX Design',
-      imageUrl: 'https://via.placeholder.com/400x300/8b5cf6/ffffff?text=UI+Design',
+      imageUrl: '', // Add image path: 'assets/images/gallery/ui.jpg'
       description: 'Modern User Interface',
       category: 'Frontend'
     }
@@ -187,6 +188,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   constructor(
     private contactService: ContactService,
+    private imageUploadService: ImageUploadService,
     private route: ActivatedRoute,
     private authService: AuthService,
     private router: Router
@@ -217,30 +219,41 @@ export class HomeComponent implements OnInit, OnDestroy {
   startProfileCarousel(): void {
     if (this.profileImages().length > 1) {
       this.profileImageInterval = setInterval(() => {
-        const validImages = this.profileImages().filter(img => !this.imageErrors.has(img));
-        if (validImages.length > 0) {
-          const currentValidIndex = validImages.findIndex(img => 
-            img === this.profileImages()[this.currentProfileImageIndex]
-          );
-          const nextIndex = (currentValidIndex + 1) % validImages.length;
-          this.currentProfileImageIndex = this.profileImages().indexOf(validImages[nextIndex]);
-        }
+        // Move to next image in the array
+        this.currentProfileImageIndex = (this.currentProfileImageIndex + 1) % this.profileImages().length;
       }, 3000); // Change every 3 seconds
     }
   }
 
-  handleImageError(event: Event, imageUrl: string): void {
-    // Mark this image as failed to prevent infinite loops
-    this.imageErrors.add(imageUrl);
+  // Handle image load error - show NO_IMAGE_FOUND placeholder
+  handleImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
-    // Hide the image instead of trying to load a placeholder
-    img.style.display = 'none';
+    const parent = img.parentElement;
     
-    // If all images failed, show a default placeholder div
-    const validImages = this.profileImages().filter(img => !this.imageErrors.has(img));
-    if (validImages.length === 0) {
-      // All images failed - could show a default avatar or message
-      console.warn('All profile images failed to load');
+    // Check if placeholder already exists
+    if (parent && !parent.querySelector('.no-image-placeholder')) {
+      img.style.display = 'none';
+      
+      // Create a text placeholder
+      const placeholder = document.createElement('div');
+      placeholder.className = 'no-image-placeholder';
+      placeholder.textContent = 'NO_IMAGE_FOUND';
+      placeholder.style.cssText = `
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        min-height: 200px;
+        background: #f0f0f0;
+        color: #999;
+        font-size: 14px;
+        font-weight: 500;
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+      `;
+      
+      parent.appendChild(placeholder);
     }
   }
 
@@ -249,6 +262,11 @@ export class HomeComponent implements OnInit, OnDestroy {
    * are reflected when viewing the public home page.
    */
   private loadFromStorage(): void {
+    // Check if we're in browser environment (not SSR)
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return;
+    }
+
     const stored = localStorage.getItem(this.storageKey);
     if (!stored) {
       // Seed storage with initial values
@@ -259,7 +277,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     try {
       const data = JSON.parse(stored) as HomePageData;
       if (data.galleryItems) {
-        this.galleryItems.set(data.galleryItems);
+        // Filter out placeholder URLs and replace with empty strings
+        const cleanedGalleryItems = data.galleryItems.map(item => ({
+          ...item,
+          imageUrl: item.imageUrl && item.imageUrl.includes('via.placeholder.com') ? '' : (item.imageUrl || '')
+        }));
+        this.galleryItems.set(cleanedGalleryItems);
+        // Save cleaned data back to localStorage
+        this.saveToStorage();
       }
       if (data.achievements) {
         this.achievements.set(data.achievements);
@@ -289,6 +314,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private saveToStorage(): void {
+    // Check if we're in browser environment (not SSR)
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return;
+    }
+
     const data: HomePageData = {
       galleryItems: this.galleryItems(),
       achievements: this.achievements(),
@@ -378,13 +408,19 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
     if (this.editingGallery()) {
       if (this.selectedGalleryImageFile) {
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          const imageDataUrl = e.target.result;
-          this.galleryForm.imageUrl = imageDataUrl;
-          this.finalizeGallerySave();
-        };
-        reader.readAsDataURL(this.selectedGalleryImageFile);
+        this.uploadingImage.set(true);
+        this.imageUploadService.uploadGalleryImage(this.selectedGalleryImageFile).subscribe({
+          next: (imageUrl) => {
+            this.galleryForm.imageUrl = imageUrl;
+            this.uploadingImage.set(false);
+            this.finalizeGallerySave();
+          },
+          error: (error) => {
+            console.error('Error uploading gallery image:', error);
+            alert('Failed to upload image: ' + error.message);
+            this.uploadingImage.set(false);
+          }
+        });
       } else {
         this.finalizeGallerySave();
       }
@@ -407,12 +443,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       this.selectedGalleryImageFile = input.files[0];
-      // Preview the image
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.galleryForm.imageUrl = e.target.result;
-      };
-      reader.readAsDataURL(this.selectedGalleryImageFile);
+      // Preview the image using object URL (temporary, not Base64)
+      const objectUrl = URL.createObjectURL(this.selectedGalleryImageFile);
+      this.galleryForm.imageUrl = objectUrl;
     }
   }
 
@@ -443,24 +476,31 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
     
     if (this.selectedGalleryImageFile) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        const imageDataUrl = e.target.result;
-        const newItem: GalleryItem = {
-          id: Date.now().toString(),
-          title: this.galleryForm.title || 'New Item',
-          imageUrl: imageDataUrl,
-          description: this.galleryForm.description,
-          category: this.galleryForm.category
-        };
-        this.galleryItems.set([...this.galleryItems(), newItem]);
-        this.selectedGalleryImageFile = null;
-        this.galleryForm = {};
-        this.addingGalleryItem.set(false);
-        this.saveToStorage();
-      };
-      reader.readAsDataURL(this.selectedGalleryImageFile);
+      this.uploadingImage.set(true);
+      this.imageUploadService.uploadGalleryImage(this.selectedGalleryImageFile).subscribe({
+        next: (imageUrl) => {
+          const newItem: GalleryItem = {
+            id: Date.now().toString(),
+            title: this.galleryForm.title || 'New Item',
+            imageUrl: imageUrl,
+            description: this.galleryForm.description,
+            category: this.galleryForm.category
+          };
+          this.galleryItems.set([...this.galleryItems(), newItem]);
+          this.selectedGalleryImageFile = null;
+          this.galleryForm = {};
+          this.addingGalleryItem.set(false);
+          this.uploadingImage.set(false);
+          this.saveToStorage();
+        },
+        error: (error) => {
+          console.error('Error uploading gallery image:', error);
+          alert('Failed to upload image: ' + error.message);
+          this.uploadingImage.set(false);
+        }
+      });
     } else if (this.galleryForm.imageUrl) {
+      // External URL - store directly
       const newItem: GalleryItem = {
         id: Date.now().toString(),
         title: this.galleryForm.title || 'New Item',
@@ -469,6 +509,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         category: this.galleryForm.category
       };
       this.galleryItems.set([...this.galleryItems(), newItem]);
+      this.selectedGalleryImageFile = null;
       this.galleryForm = {};
       this.addingGalleryItem.set(false);
       this.saveToStorage();
@@ -495,13 +536,19 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
     if (this.editingAchievement()) {
       if (this.selectedAchievementBackgroundFile) {
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          const imageDataUrl = e.target.result;
-          this.achievementForm.backgroundImage = imageDataUrl;
-          this.finalizeAchievementSave();
-        };
-        reader.readAsDataURL(this.selectedAchievementBackgroundFile);
+        this.uploadingImage.set(true);
+        this.imageUploadService.uploadAchievementImage(this.selectedAchievementBackgroundFile).subscribe({
+          next: (imageUrl) => {
+            this.achievementForm.backgroundImage = imageUrl;
+            this.uploadingImage.set(false);
+            this.finalizeAchievementSave();
+          },
+          error: (error) => {
+            console.error('Error uploading achievement image:', error);
+            alert('Failed to upload image: ' + error.message);
+            this.uploadingImage.set(false);
+          }
+        });
       } else {
         this.finalizeAchievementSave();
       }
@@ -524,12 +571,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       this.selectedAchievementBackgroundFile = input.files[0];
-      // Preview the image
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.achievementForm.backgroundImage = e.target.result;
-      };
-      reader.readAsDataURL(this.selectedAchievementBackgroundFile);
+      // Preview the image using object URL (temporary, not Base64)
+      const objectUrl = URL.createObjectURL(this.selectedAchievementBackgroundFile);
+      this.achievementForm.backgroundImage = objectUrl;
     }
   }
 
@@ -705,16 +749,23 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   addProfileImage(): void {
     if (this.selectedProfileImageFile) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        const imageDataUrl = e.target.result;
-        this.profileImages.set([...this.profileImages(), imageDataUrl]);
-        this.selectedProfileImageFile = null;
-        this.newProfileImageUrl = '';
-        this.saveToStorage();
-      };
-      reader.readAsDataURL(this.selectedProfileImageFile);
+      this.uploadingImage.set(true);
+      this.imageUploadService.uploadProfileImage(this.selectedProfileImageFile).subscribe({
+        next: (imageUrl) => {
+          this.profileImages.set([...this.profileImages(), imageUrl]);
+          this.selectedProfileImageFile = null;
+          this.newProfileImageUrl = '';
+          this.uploadingImage.set(false);
+          this.saveToStorage();
+        },
+        error: (error) => {
+          console.error('Error uploading profile image:', error);
+          alert('Failed to upload image: ' + error.message);
+          this.uploadingImage.set(false);
+        }
+      });
     } else if (this.newProfileImageUrl.trim()) {
+      // External URL - store directly
       this.profileImages.set([...this.profileImages(), this.newProfileImageUrl.trim()]);
       this.newProfileImageUrl = '';
       this.saveToStorage();
@@ -725,12 +776,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       this.selectedProfileImageFile = input.files[0];
-      // Preview the image
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.newProfileImageUrl = e.target.result;
-      };
-      reader.readAsDataURL(this.selectedProfileImageFile);
+      // Preview the image using object URL (temporary, not Base64)
+      const objectUrl = URL.createObjectURL(this.selectedProfileImageFile);
+      this.newProfileImageUrl = objectUrl;
+      // Clean up object URL when component is destroyed or image is uploaded
     }
   }
 

@@ -46,11 +46,10 @@
         <img 
           *ngFor="let img of profileImages(); let i = index"
           [src]="img" 
-          [alt]="'Profile image ' + (i + 1)"
+          [alt]="'Profile ' + (i + 1)"
           [class.active]="i === currentProfileImageIndex"
-          [class.hidden]="imageErrors.has(img)"
           class="profile-image"
-          (error)="handleImageError($event, img)"
+          (error)="handleImageError($event)"
         />
         <div class="profile-indicators" *ngIf="profileImages().length > 1">
           <span 
@@ -86,7 +85,10 @@
             <div class="image-preview" *ngIf="newProfileImageUrl">
               <img [src]="newProfileImageUrl" alt="Preview" />
             </div>
-            <button (click)="addProfileImage()" class="btn-add-small" [disabled]="!newProfileImageUrl && !selectedProfileImageFile">+ Add</button>
+            <button (click)="addProfileImage()" class="btn-add-small" [disabled]="(!newProfileImageUrl && !selectedProfileImageFile) || uploadingImage()">
+              <span *ngIf="uploadingImage()">Uploading...</span>
+              <span *ngIf="!uploadingImage()">+ Add</span>
+            </button>
           </div>
           <div class="form-actions">
             <button (click)="cancelEditProfileImages()" class="btn-cancel">Done</button>
@@ -156,7 +158,10 @@
       <input [(ngModel)]="galleryForm.description" placeholder="Description" class="styled-input" />
       <input [(ngModel)]="galleryForm.category" placeholder="Category" class="styled-input" />
       <div class="form-actions">
-        <button (click)="addGalleryItem()" class="btn-save" [disabled]="!galleryForm.imageUrl && !selectedGalleryImageFile">Save</button>
+        <button (click)="addGalleryItem()" class="btn-save" [disabled]="(!galleryForm.imageUrl && !selectedGalleryImageFile) || uploadingImage()">
+          <span *ngIf="uploadingImage()">Uploading...</span>
+          <span *ngIf="!uploadingImage()">Save</span>
+        </button>
         <button (click)="cancelAddGalleryItem()" class="btn-cancel">Cancel</button>
       </div>
     </div>
@@ -164,7 +169,7 @@
     <div class="gallery-grid">
       <div *ngFor="let item of galleryItems()" class="gallery-item">
         <div class="gallery-image">
-          <img [src]="item.imageUrl" [alt]="item.title" />
+          <img [src]="item.imageUrl || ''" [alt]="item.title" (error)="handleImageError($event)" />
           <div class="gallery-overlay">
             <h3>{{ item.title }}</h3>
             <p *ngIf="item.description">{{ item.description }}</p>
@@ -197,7 +202,10 @@
           <input [(ngModel)]="galleryForm.description" placeholder="Description" class="styled-input" />
           <input [(ngModel)]="galleryForm.category" placeholder="Category" class="styled-input" />
           <div class="form-actions">
-            <button (click)="saveGallery()" class="btn-save">Save</button>
+            <button (click)="saveGallery()" class="btn-save" [disabled]="uploadingImage()">
+              <span *ngIf="uploadingImage()">Uploading...</span>
+              <span *ngIf="!uploadingImage()">Save</span>
+            </button>
             <button (click)="cancelEditGallery()" class="btn-cancel">Cancel</button>
           </div>
         </div>
@@ -298,7 +306,10 @@
             <img [src]="achievementForm.backgroundImage" alt="Background Preview" />
           </div>
           <div class="form-actions">
-            <button (click)="saveAchievement()" class="btn-save">Save</button>
+            <button (click)="saveAchievement()" class="btn-save" [disabled]="uploadingImage()">
+              <span *ngIf="uploadingImage()">Uploading...</span>
+              <span *ngIf="!uploadingImage()">Save</span>
+            </button>
             <button (click)="cancelEditAchievement()" class="btn-cancel">Cancel</button>
           </div>
         </div>

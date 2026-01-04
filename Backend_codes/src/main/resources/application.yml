@@ -43,4 +43,9 @@ mail:
   subject:
     prefix: "Portfolio Contact Form: "
 
+# Image Upload Configuration
+app:
+  upload:
+    dir: "uploads"  # Directory for storing uploaded images (relative to project root)
+
 

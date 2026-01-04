@@ -178,7 +178,7 @@ public class EmailService {
                   <tr>
                     <td style="background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); padding: 30px 40px; border-radius: 8px 8px 0 0;">
                       <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600; text-align: center;">
-                        Thank You for Reaching Out!
+                        Here's an Update for You
                       </h1>
                     </td>
                   </tr>
@@ -190,19 +190,57 @@ public class EmailService {
                         Hi %s,
                       </h2>
                       
-                      <p style="margin: 0 0 20px 0; color: #475569; font-size: 16px; line-height: 1.6;">
-                        Thank you for contacting me through my portfolio website! I have received your message and truly appreciate you taking the time to reach out.
-                      </p>
-                      
                       <p style="margin: 0 0 30px 0; color: #475569; font-size: 16px; line-height: 1.6;">
-                        I will review your message and get back to you as soon as possible, typically within 24-48 hours.
+                        Thank you for contacting me through my portfolio website! I have received your message and truly appreciate you taking the time to reach out. Your message has been successfully delivered and I will review it shortly.
                       </p>
                       
-                      <!-- Info Box -->
-                      <div style="background-color: #f8fafc; border-left: 4px solid #667eea; border-radius: 6px; padding: 20px; margin: 30px 0;">
-                        <p style="margin: 0; color: #475569; font-size: 14px; line-height: 1.6;">
-                          <strong style="color: #1e293b;">What's Next?</strong><br>
-                          I'll review your message and respond to you directly at this email address. If your inquiry is urgent, please feel free to reach out through other channels.
+                      <!-- Confirmation Box -->
+                      <div style="background-color: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px; padding: 25px; margin: 30px 0;">
+                        <h3 style="margin: 0 0 20px 0; color: #1e293b; font-size: 18px; font-weight: 600;">
+                          ✓ Message Received
+                        </h3>
+                        
+                        <table width="100%%" cellpadding="0" cellspacing="0">
+                          <tr>
+                            <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                              <strong style="color: #334155; font-size: 14px;">Status:</strong>
+                              <span style="color: #10b981; font-size: 14px; margin-left: 10px; font-weight: 600;">✓ Successfully Received</span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                              <strong style="color: #334155; font-size: 14px;">Response Time:</strong>
+                              <span style="color: #475569; font-size: 14px; margin-left: 10px;">Typically within 24-48 hours</span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 12px 0;">
+                              <strong style="color: #334155; font-size: 14px;">Next Steps:</strong>
+                              <span style="color: #475569; font-size: 14px; margin-left: 10px;">I'll review your message and respond directly to this email address</span>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                      
+                      <!-- What's Next Section -->
+                      <div style="background-color: #ffffff; border-left: 4px solid #667eea; border-radius: 6px; padding: 20px; margin: 30px 0; background: linear-gradient(to right, #f8fafc 0%%, #ffffff 5%%);">
+                        <h3 style="margin: 0 0 15px 0; color: #1e293b; font-size: 16px; font-weight: 600;">
+                          What's Next?
+                        </h3>
+                        <p style="margin: 0 0 10px 0; color: #475569; font-size: 14px; line-height: 1.6;">
+                          • I'll carefully review your message and understand your requirements<br>
+                          • You'll receive a personalized response at this email address<br>
+                          • For urgent inquiries, feel free to reach out through other channels
+                        </p>
+                      </div>
+                      
+                      <!-- Interactive Placeholder Box -->
+                      <div style="background-color: #ffffff; border: 2px dashed #cbd5e1; border-radius: 8px; padding: 30px; margin: 30px 0; text-align: center;">
+                        <p style="margin: 0 0 10px 0; color: #1e293b; font-size: 16px; font-weight: 600;">
+                          Stay Connected
+                        </p>
+                        <p style="margin: 0; color: #94a3b8; font-size: 14px; font-style: italic;">
+                          Visit my portfolio website to explore my projects and learn more about my work
                         </p>
                       </div>
                       
@@ -211,9 +249,11 @@ public class EmailService {
                         <p style="margin: 0 0 10px 0; color: #1e293b; font-size: 16px; font-weight: 600;">
                           Best regards,
                         </p>
-                        <p style="margin: 0; color: #475569; font-size: 16px;">
-                          Abbana Durga Prasad<br>
-                          <span style="font-size: 14px; color: #64748b;">Software Developer</span>
+                        <p style="margin: 0 0 5px 0; color: #475569; font-size: 16px; font-weight: 500;">
+                          Abbana Durga Prasad
+                        </p>
+                        <p style="margin: 0; color: #64748b; font-size: 14px;">
+                          Software Developer | Portfolio: <a href="http://localhost:4200" style="color: #667eea; text-decoration: none;">Visit Website</a>
                         </p>
                       </div>
                       

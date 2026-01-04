@@ -64,7 +64,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Profile images carousel - Images from src/assets/images/profile folder
   profileImages = signal<string[]>([
     'assets/images/profile/profile2.png',
-    'assets/images/profile/profile3.jpeg'
+    'assets/images/profile/profile3.jpeg',
+    'assets/images/profile/profile1.jpg'
   ]);
   currentProfileImageIndex = 0;
   profileImageInterval: any;
@@ -78,30 +79,30 @@ export class HomeComponent implements OnInit, OnDestroy {
   galleryItems = signal<GalleryItem[]>([
     {
       id: '1',
-      title: 'Project Showcase',
+      title: 'personal-website',
       imageUrl: '', // Add image path: 'assets/images/gallery/project1.jpg'
-      description: 'Subscription Management System',
+      description: 'Intelligent Personal Website with AI Assistant, Projects & Achievements',
       category: 'Web Application'
     },
     {
       id: '2',
-      title: 'AI Chatbot',
-      imageUrl: '', // Add image path: 'assets/images/gallery/chatbot.jpg'
+      title: 'Ollama Full Stack Chat Application',
+      imageUrl: 'ollama ai img.png', // Add image path: 'assets/images/gallery/chatbot.jpg'
       description: 'Spring AI Chatbot Implementation',
       category: 'AI/ML'
     },
     {
       id: '3',
-      title: 'Medical Imaging',
+      title: 'Brain Tumor Detection using ResNet',
       imageUrl: '', // Add image path: 'assets/images/gallery/medical.jpg'
-      description: 'ResNet-based Brain Tumor Detection',
+      description: 'image classification model for brain tumor detection',
       category: 'Deep Learning'
     },
     {
       id: '4',
-      title: 'Full Stack App',
+      title: 'screenrecorder web application',
       imageUrl: '', // Add image path: 'assets/images/gallery/fullstack.jpg'
-      description: 'Modern Web Application',
+      description: 'screenrecorder web application with database',
       category: 'Web Development'
     },
     {
@@ -788,7 +789,19 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.uploadingImage.set(true);
       this.imageUploadService.uploadProfileImage(this.selectedProfileImageFile).subscribe({
         next: (imageUrl) => {
-          this.profileImages.set([...this.profileImages(), imageUrl]);
+          // Add new image to the profile images array
+          const updatedImages = [...this.profileImages(), imageUrl];
+          this.profileImages.set(updatedImages);
+          
+          // Set current index to the newly added image so it's immediately visible
+          this.currentProfileImageIndex = updatedImages.length - 1;
+          
+          // Restart carousel to include the new image
+          if (this.profileImageInterval) {
+            clearInterval(this.profileImageInterval);
+          }
+          this.startProfileCarousel();
+          
           this.selectedProfileImageFile = null;
           this.newProfileImageUrl = '';
           this.uploadingImage.set(false);
@@ -808,7 +821,18 @@ export class HomeComponent implements OnInit, OnDestroy {
       });
     } else if (this.newProfileImageUrl.trim()) {
       // External URL - store directly
-      this.profileImages.set([...this.profileImages(), this.newProfileImageUrl.trim()]);
+      const updatedImages = [...this.profileImages(), this.newProfileImageUrl.trim()];
+      this.profileImages.set(updatedImages);
+      
+      // Set current index to the newly added image so it's immediately visible
+      this.currentProfileImageIndex = updatedImages.length - 1;
+      
+      // Restart carousel to include the new image
+      if (this.profileImageInterval) {
+        clearInterval(this.profileImageInterval);
+      }
+      this.startProfileCarousel();
+      
       this.newProfileImageUrl = '';
       this.saveToStorage();
     }
@@ -837,9 +861,21 @@ export class HomeComponent implements OnInit, OnDestroy {
   removeProfileImage(index: number): void {
     const images = this.profileImages().filter((_, i) => i !== index);
     this.profileImages.set(images);
+    
+    // Adjust current index if needed
     if (this.currentProfileImageIndex >= images.length) {
       this.currentProfileImageIndex = 0;
+    } else if (this.currentProfileImageIndex > index) {
+      // If we removed an image before the current one, adjust index
+      this.currentProfileImageIndex--;
     }
+    
+    // Restart carousel with updated images
+    if (this.profileImageInterval) {
+      clearInterval(this.profileImageInterval);
+    }
+    this.startProfileCarousel();
+    
     this.saveToStorage();
   }
 

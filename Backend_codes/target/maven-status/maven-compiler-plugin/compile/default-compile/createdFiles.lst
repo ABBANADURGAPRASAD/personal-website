@@ -14,7 +14,6 @@ com/example/demo/DemoApplication.class
 com/example/demo/service/ProfileDataService.class
 com/example/demo/service/EmailService.class
 com/example/demo/config/CorsConfig.class
-com/example/demo/controller/ImageUploadController$ImageListResponse.class
 com/example/demo/controller/ImageUploadController$ImageUploadResponse.class
 com/example/demo/controller/ImageUploadController.class
 com/example/demo/controller/ImageUploadController$MessageResponse.class

@@ -417,7 +417,13 @@ export class HomeComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Error uploading gallery image:', error);
-            alert('Failed to upload image: ' + error.message);
+            let errorMessage = 'Failed to upload image';
+            if (error.message && error.message.includes('413')) {
+              errorMessage = 'Image file is too large. Maximum size is 20MB. Please choose a smaller image.';
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+            alert(errorMessage);
             this.uploadingImage.set(false);
           }
         });
@@ -442,7 +448,16 @@ export class HomeComponent implements OnInit, OnDestroy {
   onGalleryImageFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
-      this.selectedGalleryImageFile = input.files[0];
+      const file = input.files[0];
+      const maxSize = 20 * 1024 * 1024; // 20MB in bytes
+      
+      if (file.size > maxSize) {
+        alert(`Image file is too large. Maximum size is 20MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB. Please choose a smaller image.`);
+        input.value = ''; // Clear the input
+        return;
+      }
+      
+      this.selectedGalleryImageFile = file;
       // Preview the image using object URL (temporary, not Base64)
       const objectUrl = URL.createObjectURL(this.selectedGalleryImageFile);
       this.galleryForm.imageUrl = objectUrl;
@@ -495,7 +510,13 @@ export class HomeComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error uploading gallery image:', error);
-          alert('Failed to upload image: ' + error.message);
+          let errorMessage = 'Failed to upload image';
+          if (error.message && error.message.includes('413')) {
+            errorMessage = 'Image file is too large. Maximum size is 20MB. Please choose a smaller image.';
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+          alert(errorMessage);
           this.uploadingImage.set(false);
         }
       });
@@ -545,7 +566,13 @@ export class HomeComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Error uploading achievement image:', error);
-            alert('Failed to upload image: ' + error.message);
+            let errorMessage = 'Failed to upload image';
+            if (error.message && error.message.includes('413')) {
+              errorMessage = 'Image file is too large. Maximum size is 20MB. Please choose a smaller image.';
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+            alert(errorMessage);
             this.uploadingImage.set(false);
           }
         });
@@ -570,7 +597,16 @@ export class HomeComponent implements OnInit, OnDestroy {
   onAchievementBackgroundFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
-      this.selectedAchievementBackgroundFile = input.files[0];
+      const file = input.files[0];
+      const maxSize = 20 * 1024 * 1024; // 20MB in bytes
+      
+      if (file.size > maxSize) {
+        alert(`Image file is too large. Maximum size is 20MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB. Please choose a smaller image.`);
+        input.value = ''; // Clear the input
+        return;
+      }
+      
+      this.selectedAchievementBackgroundFile = file;
       // Preview the image using object URL (temporary, not Base64)
       const objectUrl = URL.createObjectURL(this.selectedAchievementBackgroundFile);
       this.achievementForm.backgroundImage = objectUrl;
@@ -758,11 +794,17 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.uploadingImage.set(false);
           this.saveToStorage();
         },
-        error: (error) => {
-          console.error('Error uploading profile image:', error);
-          alert('Failed to upload image: ' + error.message);
-          this.uploadingImage.set(false);
-        }
+          error: (error) => {
+            console.error('Error uploading profile image:', error);
+            let errorMessage = 'Failed to upload image';
+            if (error.message && error.message.includes('413')) {
+              errorMessage = 'Image file is too large. Maximum size is 20MB. Please choose a smaller image.';
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+            alert(errorMessage);
+            this.uploadingImage.set(false);
+          }
       });
     } else if (this.newProfileImageUrl.trim()) {
       // External URL - store directly
@@ -775,7 +817,16 @@ export class HomeComponent implements OnInit, OnDestroy {
   onProfileImageFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
-      this.selectedProfileImageFile = input.files[0];
+      const file = input.files[0];
+      const maxSize = 20 * 1024 * 1024; // 20MB in bytes
+      
+      if (file.size > maxSize) {
+        alert(`Image file is too large. Maximum size is 20MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB. Please choose a smaller image.`);
+        input.value = ''; // Clear the input
+        return;
+      }
+      
+      this.selectedProfileImageFile = file;
       // Preview the image using object URL (temporary, not Base64)
       const objectUrl = URL.createObjectURL(this.selectedProfileImageFile);
       this.newProfileImageUrl = objectUrl;

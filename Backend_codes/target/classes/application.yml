@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: personal-ai-backend
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 20MB
+      max-request-size: 20MB
   mail:
     host: smtp.gmail.com
     port: 587

@@ -107,17 +107,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     },
     {
       id: '5',
-      title: 'API Development',
+      title: 'blog management system',
       imageUrl: '', // Add image path: 'assets/images/gallery/api.jpg'
-      description: 'RESTful API Architecture',
-      category: 'Backend'
+      description: 'blog management system with spring boot and angular',
+      category: 'Web Development'
     },
     {
       id: '6',
-      title: 'UI/UX Design',
+      title: 'Object Detection using YOLOv8',
       imageUrl: '', // Add image path: 'assets/images/gallery/ui.jpg'
-      description: 'Modern User Interface',
-      category: 'Frontend'
+      description: 'Object detection using YOLOv8',
+      category: 'Deep Learning'
     }
   ]);
 
@@ -125,11 +125,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   achievements = signal<Achievement[]>([
     {
       id: '1',
-      title: 'Certified Java Developer',
-      description: 'Oracle Certified Professional Java SE Developer',
+      title: 'Java TalentNext 2025',
+      description: 'Java TalentNext 2025 development certificate',
       icon: '🏆',
-      date: '2023',
-      organization: 'Oracle'
+      date: '2025',
+      organization: 'wipro'
     },
     {
       id: '2',
@@ -277,19 +277,40 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     try {
       const data = JSON.parse(stored) as HomePageData;
+      
+      // Merge gallery items: keep existing items, add new ones from initial data
       if (data.galleryItems) {
+        const storedIds = new Set(data.galleryItems.map(item => item.id));
+        const initialGalleryItems = this.galleryItems();
+        const newItems = initialGalleryItems.filter(item => !storedIds.has(item.id));
+        const mergedGalleryItems = [...data.galleryItems, ...newItems];
+        
         // Filter out placeholder URLs and replace with empty strings
-        const cleanedGalleryItems = data.galleryItems.map(item => ({
+        const cleanedGalleryItems = mergedGalleryItems.map(item => ({
           ...item,
           imageUrl: item.imageUrl && item.imageUrl.includes('via.placeholder.com') ? '' : (item.imageUrl || '')
         }));
         this.galleryItems.set(cleanedGalleryItems);
-        // Save cleaned data back to localStorage
+        // Save merged data back to localStorage
+        this.saveToStorage();
+      } else {
+        // No stored gallery items, use initial values
         this.saveToStorage();
       }
+      
+      // Merge achievements: keep existing items, add new ones from initial data
       if (data.achievements) {
-        this.achievements.set(data.achievements);
+        const storedIds = new Set(data.achievements.map(item => item.id));
+        const initialAchievements = this.achievements();
+        const newItems = initialAchievements.filter(item => !storedIds.has(item.id));
+        const mergedAchievements = [...data.achievements, ...newItems];
+        this.achievements.set(mergedAchievements);
+        this.saveToStorage();
+      } else {
+        // No stored achievements, use initial values
+        this.saveToStorage();
       }
+      
       if (data.sections) {
         this.sections.set(data.sections);
       }
@@ -311,6 +332,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       }
     } catch (e) {
       console.error('Error loading home page data from storage', e);
+      // On error, reset to initial values
+      this.saveToStorage();
     }
   }
 

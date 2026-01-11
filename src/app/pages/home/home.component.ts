@@ -108,7 +108,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     {
       id: '5',
       title: 'blog management system',
-      imageUrl: 'assets/images/gallery/blog-management.jpg', // Add image path: 'assets/images/gallery/api.jpg'
+      imageUrl: 'assets/images/gallery/Blogmang.png', // Add image path: 'assets/images/gallery/api.jpg'
       description: 'blog management system with spring boot and angular',
       category: 'Web Development'
     },

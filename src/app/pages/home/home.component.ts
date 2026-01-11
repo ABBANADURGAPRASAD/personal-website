@@ -47,7 +47,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }>({
     welcomeTitle: 'Welcome to My World',
     welcomeSubtitle: 'Full Stack Developer | Spring Boot | Angular | AI',
-    galleryTitle: 'Gallery',
+    galleryTitle: 'Projects & Gallery',
     gallerySubtitle: 'A visual showcase of my work and projects',
     achievementsTitle: 'Achievements & Certifications',
     achievementsSubtitle: 'Recognition and milestones in my career'
@@ -80,42 +80,42 @@ export class HomeComponent implements OnInit, OnDestroy {
     {
       id: '1',
       title: 'personal-website',
-      imageUrl: '', // Add image path: 'assets/images/gallery/project1.jpg'
+      imageUrl: 'assets/images/gallery/personal-website.png', // Add image path: 'assets/images/gallery/project1.jpg'
       description: 'Intelligent Personal Website with AI Assistant, Projects & Achievements',
       category: 'Web Application'
     },
     {
       id: '2',
       title: 'Ollama Full Stack Chat Application',
-      imageUrl: 'ollama ai img.png', // Add image path: 'assets/images/gallery/chatbot.jpg'
+      imageUrl: 'assets/images/gallery/ollama ai img.png', // Add image path: 'assets/images/gallery/chatbot.jpg'
       description: 'Spring AI Chatbot Implementation',
       category: 'AI/ML'
     },
     {
       id: '3',
       title: 'Brain Tumor Detection using ResNet',
-      imageUrl: '', // Add image path: 'assets/images/gallery/medical.jpg'
+      imageUrl: 'assets/images/gallery/BrainTumorDetection.png', // Add image path: 'assets/images/gallery/medical.jpg'
       description: 'image classification model for brain tumor detection',
       category: 'Deep Learning'
     },
     {
       id: '4',
       title: 'screenrecorder web application',
-      imageUrl: '', // Add image path: 'assets/images/gallery/fullstack.jpg'
+      imageUrl: 'assets/images/gallery/ScreenRecoding.png', // Add image path: 'assets/images/gallery/fullstack.jpg'
       description: 'screenrecorder web application with database',
       category: 'Web Development'
     },
     {
       id: '5',
       title: 'blog management system',
-      imageUrl: '', // Add image path: 'assets/images/gallery/api.jpg'
+      imageUrl: 'assets/images/gallery/blog-management.jpg', // Add image path: 'assets/images/gallery/api.jpg'
       description: 'blog management system with spring boot and angular',
       category: 'Web Development'
     },
     {
       id: '6',
       title: 'Object Detection using YOLOv8',
-      imageUrl: '', // Add image path: 'assets/images/gallery/ui.jpg'
+      imageUrl: 'assets/images/gallery/yolov8-detection.jpg', // Add image path: 'assets/images/gallery/ui.jpg'
       description: 'Object detection using YOLOv8',
       category: 'Deep Learning'
     }
@@ -278,15 +278,39 @@ export class HomeComponent implements OnInit, OnDestroy {
     try {
       const data = JSON.parse(stored) as HomePageData;
       
-      // Merge gallery items: keep existing items, add new ones from initial data
+      // Merge gallery items: update existing items with new code values, add new ones from initial data
       if (data.galleryItems) {
         const storedIds = new Set(data.galleryItems.map(item => item.id));
         const initialGalleryItems = this.galleryItems();
+        
+        // Create a map of initial items by ID for quick lookup
+        const initialItemsMap = new Map(initialGalleryItems.map(item => [item.id, item]));
+        
+        // Merge: update stored items with initial values from code (prioritize code values)
+        const mergedGalleryItems = data.galleryItems.map(storedItem => {
+          const initialItem = initialItemsMap.get(storedItem.id);
+          if (initialItem) {
+            // Update with code values, but keep stored imageUrl if it was uploaded/changed by user
+            // (check if stored imageUrl is a full URL or uploaded path, not just initial placeholder)
+            const hasUserUploadedImage = storedItem.imageUrl && 
+              !storedItem.imageUrl.includes('via.placeholder.com') && 
+              storedItem.imageUrl !== initialItem.imageUrl &&
+              (storedItem.imageUrl.startsWith('http') || storedItem.imageUrl.includes('/uploads/'));
+            
+            return {
+              ...initialItem, // Code values take precedence (title, description, category)
+              imageUrl: hasUserUploadedImage ? storedItem.imageUrl : initialItem.imageUrl // Keep user-uploaded images
+            };
+          }
+          return storedItem;
+        });
+        
+        // Add new items from initial data that don't exist in stored data
         const newItems = initialGalleryItems.filter(item => !storedIds.has(item.id));
-        const mergedGalleryItems = [...data.galleryItems, ...newItems];
+        const finalGalleryItems = [...mergedGalleryItems, ...newItems];
         
         // Filter out placeholder URLs and replace with empty strings
-        const cleanedGalleryItems = mergedGalleryItems.map(item => ({
+        const cleanedGalleryItems = finalGalleryItems.map(item => ({
           ...item,
           imageUrl: item.imageUrl && item.imageUrl.includes('via.placeholder.com') ? '' : (item.imageUrl || '')
         }));
@@ -298,13 +322,37 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.saveToStorage();
       }
       
-      // Merge achievements: keep existing items, add new ones from initial data
+      // Merge achievements: update existing items with new code values, add new ones from initial data
       if (data.achievements) {
         const storedIds = new Set(data.achievements.map(item => item.id));
         const initialAchievements = this.achievements();
+        
+        // Create a map of initial items by ID for quick lookup
+        const initialItemsMap = new Map(initialAchievements.map(item => [item.id, item]));
+        
+        // Merge: update stored items with initial values from code (prioritize code values)
+        const mergedAchievements = data.achievements.map(storedItem => {
+          const initialItem = initialItemsMap.get(storedItem.id);
+          if (initialItem) {
+            // Update with code values, but keep stored backgroundImage if it was uploaded/changed by user
+            // (check if stored backgroundImage is a full URL or uploaded path, not just initial placeholder)
+            const hasUserUploadedImage = storedItem.backgroundImage && 
+              !storedItem.backgroundImage.includes('via.placeholder.com') && 
+              storedItem.backgroundImage !== initialItem.backgroundImage &&
+              (storedItem.backgroundImage.startsWith('http') || storedItem.backgroundImage.includes('/uploads/'));
+            
+            return {
+              ...initialItem, // Code values take precedence (title, description, icon, date, organization)
+              backgroundImage: hasUserUploadedImage ? storedItem.backgroundImage : initialItem.backgroundImage // Keep user-uploaded images
+            };
+          }
+          return storedItem;
+        });
+        
+        // Add new items from initial data that don't exist in stored data
         const newItems = initialAchievements.filter(item => !storedIds.has(item.id));
-        const mergedAchievements = [...data.achievements, ...newItems];
-        this.achievements.set(mergedAchievements);
+        const finalAchievements = [...mergedAchievements, ...newItems];
+        this.achievements.set(finalAchievements);
         this.saveToStorage();
       } else {
         // No stored achievements, use initial values

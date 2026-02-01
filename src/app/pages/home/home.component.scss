@@ -441,6 +441,18 @@
   &:hover img {
     transform: scale(1.1);
   }
+
+  &.gallery-image-clickable {
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: none;
+    font: inherit;
+    text-align: left;
+    display: block;
+    width: 100%;
+  }
 }
 
 .gallery-overlay {

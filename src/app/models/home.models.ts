@@ -4,6 +4,7 @@ export interface GalleryItem {
   imageUrl: string;
   description?: string;
   category?: string;
+  projectUrl?: string; // URL to open when project is clicked (e.g. live demo or Angular app route)
 }
 
 export interface Achievement {

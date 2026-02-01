@@ -157,6 +157,7 @@
       </div>
       <input [(ngModel)]="galleryForm.description" placeholder="Description" class="styled-input" />
       <input [(ngModel)]="galleryForm.category" placeholder="Category" class="styled-input" />
+      <input [(ngModel)]="galleryForm.projectUrl" placeholder="Project URL (e.g. https://demo.com or /projects/1)" class="styled-input" />
       <div class="form-actions">
         <button (click)="addGalleryItem()" class="btn-save" [disabled]="(!galleryForm.imageUrl && !selectedGalleryImageFile) || uploadingImage()">
           <span *ngIf="uploadingImage()">Uploading...</span>
@@ -168,14 +169,30 @@
 
     <div class="gallery-grid">
       <div *ngFor="let item of galleryItems()" class="gallery-item">
-        <div class="gallery-image">
-          <img [src]="item.imageUrl || ''" [alt]="item.title" (error)="handleImageError($event)" />
-          <div class="gallery-overlay">
-            <h3>{{ item.title }}</h3>
-            <p *ngIf="item.description">{{ item.description }}</p>
-            <span *ngIf="item.category" class="gallery-category">{{ item.category }}</span>
+        <ng-container [ngSwitch]="!secureMode() && !!item.projectUrl">
+          <button
+            *ngSwitchCase="true"
+            type="button"
+            class="gallery-image gallery-image-clickable"
+            [attr.aria-label]="'Open project: ' + item.title"
+            (click)="openProject(item)"
+          >
+            <img [src]="item.imageUrl || ''" [alt]="item.title" (error)="handleImageError($event)" />
+            <div class="gallery-overlay">
+              <h3>{{ item.title }}</h3>
+              <p *ngIf="item.description">{{ item.description }}</p>
+              <span *ngIf="item.category" class="gallery-category">{{ item.category }}</span>
+            </div>
+          </button>
+          <div *ngSwitchDefault class="gallery-image">
+            <img [src]="item.imageUrl || ''" [alt]="item.title" (error)="handleImageError($event)" />
+            <div class="gallery-overlay">
+              <h3>{{ item.title }}</h3>
+              <p *ngIf="item.description">{{ item.description }}</p>
+              <span *ngIf="item.category" class="gallery-category">{{ item.category }}</span>
+            </div>
           </div>
-        </div>
+        </ng-container>
         <div *ngIf="secureMode()" class="gallery-actions">
           <button class="btn-edit" (click)="startEditGallery(item)">✏️ Edit</button>
           <button class="btn-delete" (click)="deleteGalleryItem(item.id)">🗑️ Delete</button>
@@ -201,6 +218,7 @@
           </div>
           <input [(ngModel)]="galleryForm.description" placeholder="Description" class="styled-input" />
           <input [(ngModel)]="galleryForm.category" placeholder="Category" class="styled-input" />
+          <input [(ngModel)]="galleryForm.projectUrl" placeholder="Project URL (e.g. https://demo.com or /projects/1)" class="styled-input" />
           <div class="form-actions">
             <button (click)="saveGallery()" class="btn-save" [disabled]="uploadingImage()">
               <span *ngIf="uploadingImage()">Uploading...</span>

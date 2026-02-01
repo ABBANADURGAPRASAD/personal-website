@@ -80,44 +80,50 @@ export class HomeComponent implements OnInit, OnDestroy {
     {
       id: '1',
       title: 'personal-website',
-      imageUrl: 'assets/images/gallery/personal-website.png', // Add image path: 'assets/images/gallery/project1.jpg'
+      imageUrl: 'assets/images/gallery/personal-website.png',
       description: 'Intelligent Personal Website with AI Assistant, Projects & Achievements',
-      category: 'Web Application'
+      category: 'Full-stack web Application',
+      projectUrl: 'http://localhost:4300/'
     },
     {
       id: '2',
       title: 'Ollama Full Stack Chat Application',
-      imageUrl: 'assets/images/gallery/ollama ai img.png', // Add image path: 'assets/images/gallery/chatbot.jpg'
+      imageUrl: 'assets/images/gallery/ollama ai img.png',
       description: 'Spring AI Chatbot Implementation',
-      category: 'AI/ML'
+      category: 'AI/ML',
+      projectUrl: 'http://localhost:4500/'
     },
     {
       id: '3',
       title: 'Brain Tumor Detection using ResNet',
-      imageUrl: 'assets/images/gallery/BrainTumorDetection.png', // Add image path: 'assets/images/gallery/medical.jpg'
+      imageUrl: 'assets/images/gallery/BrainTumorDetection.png',
       description: 'image classification model for brain tumor detection',
-      category: 'Deep Learning'
+      category: 'Deep Learning',
+      projectUrl: 'http://localhost:4600/'
     },
     {
       id: '4',
       title: 'screenrecorder web application',
-      imageUrl: 'assets/images/gallery/ScreenRecoding.png', // Add image path: 'assets/images/gallery/fullstack.jpg'
+      imageUrl: 'assets/images/gallery/ScreenRecoding.png',
       description: 'screenrecorder web application with database',
-      category: 'Web Development'
+      category: 'Web Development',
+      projectUrl: 'http://localhost:4700/'
     },
     {
       id: '5',
       title: 'blog management system',
-      imageUrl: 'assets/images/gallery/Blogmang.png', // Add image path: 'assets/images/gallery/api.jpg'
+      imageUrl: 'assets/images/gallery/Blogmang.png',
       description: 'blog management system with spring boot and angular',
-      category: 'Web Development'
+      category: 'Full-stack web Development',
+      projectUrl: 'http://localhost:4400/'
     },
     {
       id: '6',
       title: 'Object Detection using YOLOv8',
-      imageUrl: 'assets/images/gallery/yolov8-detection.jpg', // Add image path: 'assets/images/gallery/ui.jpg'
+      imageUrl: 'assets/images/gallery/yolov8-detection.png',
       description: 'Object detection using YOLOv8',
-      category: 'Deep Learning'
+      category: 'Deep Learning',
+      projectUrl: 'http://localhost:4800/'
     }
   ]);
 
@@ -222,7 +228,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.profileImageInterval = setInterval(() => {
         // Move to next image in the array
         this.currentProfileImageIndex = (this.currentProfileImageIndex + 1) % this.profileImages().length;
-      }, 3000); // Change every 3 seconds
+      }, 300); // Change every 3 seconds
     }
   }
 
@@ -543,6 +549,18 @@ export class HomeComponent implements OnInit, OnDestroy {
     const items = this.galleryItems().filter(item => item.id !== id);
     this.galleryItems.set(items);
     this.saveToStorage();
+  }
+
+  /** Open project URL in new tab when user clicks a gallery item (only when projectUrl is set). */
+  openProject(item: GalleryItem): void {
+    if (!item.projectUrl) return;
+    const url = item.projectUrl.trim();
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      // Internal Angular route
+      this.router.navigateByUrl(url);
+    }
   }
 
   startAddGalleryItem(): void {

@@ -19,7 +19,6 @@
         <h1 *ngIf="!secureMode() || editingHeading() !== 'welcome'">{{ sectionHeadings().welcomeTitle }}</h1>
           <div *ngIf="secureMode() && editingHeading() === 'welcome'" class="edit-heading-form">
             <input [(ngModel)]="headingForm.welcomeTitle" placeholder="Welcome Title" class="styled-input heading-input" />
-            <input [(ngModel)]="headingForm.welcomeSubtitle" placeholder="Welcome Subtitle" class="styled-input heading-input" />
             <div class="form-actions">
               <button (click)="saveHeading()" class="btn-save">Save</button>
               <button (click)="cancelEditHeading()" class="btn-cancel">Cancel</button>
@@ -27,7 +26,6 @@
           </div>
         <button *ngIf="secureMode() && editingHeading() !== 'welcome'" class="btn-edit-heading" (click)="startEditHeading('welcome')" title="Edit heading">✏️</button>
       </div>
-      <p class="subtitle" *ngIf="!secureMode() || editingHeading() !== 'welcome'">{{ sectionHeadings().welcomeSubtitle }}</p>
     </section>
     
     <!-- Buttons Section (Right) -->
@@ -130,7 +128,6 @@
           </div>
           <button *ngIf="secureMode() && editingHeading() !== 'gallery'" class="btn-edit-heading" (click)="startEditHeading('gallery')" title="Edit heading">✏️</button>
         </div>
-        <p class="section-subtitle" *ngIf="!secureMode() || editingHeading() !== 'gallery'">{{ sectionHeadings().gallerySubtitle }}</p>
       </div>
       <button *ngIf="secureMode() && !editingGallery() && !addingGalleryItem() && editingHeading() !== 'gallery'" class="btn-add" (click)="startAddGalleryItem()">+ Add Item</button>
     </div>

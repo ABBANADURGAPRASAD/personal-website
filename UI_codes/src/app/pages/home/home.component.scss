@@ -16,8 +16,7 @@
 .top-section {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 2rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1em;
   align-items: start;
 }
 
@@ -292,7 +291,7 @@
 .bio-card {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  padding: 2rem;
+  padding: 3.3em;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
 
@@ -338,7 +337,6 @@
 // Gallery Section (Bottom, Full Width)
 .gallery-section {
   width: 100%;
-  margin: 2rem 0;
   padding: 3rem 2rem;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
@@ -493,7 +491,7 @@
 // Achievements Section
 .achievements-section {
   width: 100%;
-  margin: 4rem 0;
+  margin: 2rem 0;
   padding: 3rem 2rem;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
@@ -504,8 +502,8 @@
 
 .achievements-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
 }
 
 .achievement-item-wrapper {
@@ -532,6 +530,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 350px;
 
   // Overlay for better text readability when background image is present
   &::before {
@@ -597,6 +596,7 @@
   }
 
   .achievement-meta {
+    margin-top: auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -636,7 +636,7 @@
 .contact-section {
   width: 100%;
   max-width: 800px;
-  margin: 4rem auto;
+  margin: 1rem auto;
   padding: 3rem 2rem;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
@@ -892,7 +892,7 @@
 
 .section-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-bottom: 1.5rem;
 }

@@ -39,22 +39,17 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Section headings
   sectionHeadings = signal<{
     welcomeTitle: string;
-    welcomeSubtitle: string;
     galleryTitle: string;
-    gallerySubtitle: string;
     achievementsTitle: string;
     achievementsSubtitle: string;
   }>({
-    welcomeTitle: 'Welcome to My World',
-    welcomeSubtitle: 'Full Stack Developer | Spring Boot | Angular | AI',
+    welcomeTitle: 'Durga Prasad Abbana | Engineering Intelligence',
     galleryTitle: 'Projects & Gallery',
-    gallerySubtitle: 'A visual showcase of my work and projects',
     achievementsTitle: 'Achievements & Certifications',
     achievementsSubtitle: 'Recognition and milestones in my career'
   });
   headingForm: Partial<{
     welcomeTitle: string;
-    welcomeSubtitle: string;
     galleryTitle: string;
     gallerySubtitle: string;
     achievementsTitle: string;
@@ -377,9 +372,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       if (data.sectionHeadings) {
         this.sectionHeadings.set({
           welcomeTitle: data.sectionHeadings.welcomeTitle || this.sectionHeadings().welcomeTitle,
-          welcomeSubtitle: data.sectionHeadings.welcomeSubtitle || this.sectionHeadings().welcomeSubtitle,
           galleryTitle: data.sectionHeadings.galleryTitle || this.sectionHeadings().galleryTitle,
-          gallerySubtitle: data.sectionHeadings.gallerySubtitle || this.sectionHeadings().gallerySubtitle,
           achievementsTitle: data.sectionHeadings.achievementsTitle || this.sectionHeadings().achievementsTitle,
           achievementsSubtitle: data.sectionHeadings.achievementsSubtitle || this.sectionHeadings().achievementsSubtitle
         });
@@ -975,12 +968,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (headingType === 'welcome') {
       this.headingForm = {
         welcomeTitle: headings.welcomeTitle,
-        welcomeSubtitle: headings.welcomeSubtitle
       };
     } else if (headingType === 'gallery') {
       this.headingForm = {
         galleryTitle: headings.galleryTitle,
-        gallerySubtitle: headings.gallerySubtitle
       };
     } else if (headingType === 'achievements') {
       this.headingForm = {

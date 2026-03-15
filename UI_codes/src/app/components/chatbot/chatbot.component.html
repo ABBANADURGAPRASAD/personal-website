@@ -101,14 +101,35 @@
     <app-agent-capabilities [class.hidden]="isMinimized()"></app-agent-capabilities>
 
     <div class="chat-input" [class.hidden]="isMinimized()">
-      <input
-        type="text"
-        [(ngModel)]="userInput"
-        (keypress)="onKeyPress($event)"
-        placeholder="Ask about profile, projects, skills, or technologies..."
-        [disabled]="isTyping()"
-        aria-label="Chat input"
-      />
+      <div class="input-with-mic">
+        <input
+          type="text"
+          [(ngModel)]="userInput"
+          (keypress)="onKeyPress($event)"
+          placeholder="Ask about profile, projects, skills, or technologies..."
+          [disabled]="isTyping()"
+          aria-label="Chat input"
+          class="chat-input-field"
+        />
+        <button
+          *ngIf="speechRecognitionSupported()"
+          type="button"
+          class="mic-btn-inside"
+          [class.recording]="isRecording()"
+          (click)="toggleSpeechInput(); $event.preventDefault(); $event.stopPropagation()"
+          [disabled]="isTyping()"
+          [attr.aria-label]="isRecording() ? 'Stop listening' : 'Speech to text'"
+          [title]="isRecording() ? 'Stop listening' : 'Speech to text'"
+        >
+          <svg *ngIf="!isRecording()" class="mic-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+          <span *ngIf="isRecording()" class="mic-recording-dot" aria-hidden="true"></span>
+        </button>
+      </div>
       <button 
         (click)="sendMessage()" 
         [disabled]="!userInput.trim() || isTyping()"

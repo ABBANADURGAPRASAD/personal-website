@@ -134,43 +134,43 @@ export class HomeComponent implements OnInit, OnDestroy {
     },
     {
       id: '2',
-      title: 'Best Project Award',
-      description: 'Won best project award for Subscription Management System',
+      title: 'Letter of achievement',
+      description: 'letter of achievement for the project and placement in Vision Waves',
       icon: '🥇',
-      date: '2024',
-      organization: 'Tech Innovation Summit'
+      date: '2025',
+      organization: 'Sasi Institute of Technology and Engineering'
     },
     {
       id: '3',
-      title: 'AI/ML Specialist',
-      description: 'Completed advanced course in Machine Learning and Deep Learning',
+      title: 'Paper Presentation on IEEE Conference',
+      description: 'Paper Presentation on IEEE Conference on Brain Tumor Detection using ResNet',
       icon: '🎓',
-      date: '2024',
-      organization: 'Coursera'
+      date: '2025',
+      organization: 'International IEEE Conference'
     },
     {
       id: '4',
-      title: 'Open Source Contributor',
-      description: 'Active contributor to multiple open-source projects',
+      title: 'Impact of Life Skills and Soft Skills on Employability',
+      description: 'National Workshop on Impact of Life Skills and Soft Skills on Employability',
       icon: '🌟',
       date: '2023-2024',
-      organization: 'GitHub'
+      organization: 'Sasi Institute of Technology and Engineering'
     },
     {
       id: '5',
-      title: 'Hackathon Winner',
-      description: 'First place in regional coding hackathon',
+      title: 'Fast-Track SITE show',
+      description: 'Fast-Track SITE show on the topic of english language proficiency',
       icon: '💻',
       date: '2023',
-      organization: 'Tech Community'
+      organization: 'Sasi Institute of Technology and Engineering'
     },
     {
       id: '6',
       title: 'Published Research',
-      description: 'Co-authored paper on AI in Medical Imaging',
+      description: 'Published research paper on Brain Tumor Detection using ResNet',
       icon: '📄',
-      date: '2024',
-      organization: 'IEEE'
+      date: '2025',
+      organization: 'International IEEE Conference'
     }
   ]);
 

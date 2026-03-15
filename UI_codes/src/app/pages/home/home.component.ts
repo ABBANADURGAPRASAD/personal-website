@@ -6,6 +6,7 @@ import { GalleryItem, Achievement, ContactForm, HomeSection, HomePageData } from
 import { ContactService } from '../../services/contact.service';
 import { ImageUploadService } from '../../services/image-upload.service';
 import { AuthService } from '../../services/auth';
+import { AchievementService } from '../../services/achievement.service';
 
 @Component({
   selector: 'app-home',
@@ -191,6 +192,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(
     private contactService: ContactService,
     private imageUploadService: ImageUploadService,
+    private achievementService: AchievementService,
     private route: ActivatedRoute,
     private authService: AuthService,
     private router: Router
@@ -207,8 +209,15 @@ export class HomeComponent implements OnInit, OnDestroy {
     // Start profile image carousel (changes every 3 seconds)
     this.startProfileCarousel();
 
-    // Load persisted content (gallery, achievements, custom sections)
+    // Load persisted content (gallery, custom sections, etc.)
     this.loadFromStorage();
+    // Load achievements from API (DB); fallback to current list if API returns empty or fails
+    this.achievementService.getAll().subscribe((list) => {
+      if (list && list.length > 0) {
+        this.achievements.set(list);
+        this.saveToStorage();
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -666,15 +675,29 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private finalizeAchievementSave(): void {
-    const items = this.achievements();
-    const index = items.findIndex(item => item.id === this.editingAchievement());
-    if (index !== -1) {
-      items[index] = { ...items[index], ...this.achievementForm } as Achievement;
-      this.achievements.set([...items]);
-    }
-    this.selectedAchievementBackgroundFile = null;
-    this.cancelEditAchievement();
-    this.saveToStorage();
+    const editingId = this.editingAchievement();
+    if (!editingId) return;
+    const body = {
+      title: this.achievementForm.title,
+      description: this.achievementForm.description,
+      icon: this.achievementForm.icon,
+      date: this.achievementForm.date,
+      organization: this.achievementForm.organization,
+      backgroundImage: this.achievementForm.backgroundImage
+    };
+    this.achievementService.update(editingId, body).subscribe((updated) => {
+      if (updated) {
+        const items = this.achievements();
+        const index = items.findIndex(item => item.id === editingId);
+        if (index !== -1) {
+          items[index] = { ...items[index], ...updated };
+          this.achievements.set([...items]);
+        }
+      }
+      this.selectedAchievementBackgroundFile = null;
+      this.cancelEditAchievement();
+      this.saveToStorage();
+    });
   }
 
   onAchievementBackgroundFileSelected(event: Event): void {
@@ -700,9 +723,15 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.secureMode() && !confirm('Are you sure you want to remove this achievement?')) {
       return;
     }
-    const items = this.achievements().filter(item => item.id !== id);
-    this.achievements.set(items);
-    this.saveToStorage();
+    this.achievementService.delete(id).subscribe((ok) => {
+      if (ok) {
+        const items = this.achievements().filter(item => item.id !== id);
+        this.achievements.set(items);
+        this.saveToStorage();
+      } else {
+        alert('Failed to delete achievement. Please try again.');
+      }
+    });
   }
 
   startAddAchievement(): void {
@@ -721,41 +750,42 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (!this.achievementForm.title) {
       return;
     }
-    
-    if (this.selectedAchievementBackgroundFile) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        const imageDataUrl = e.target.result;
-        const newAchievement: Achievement = {
-          id: Date.now().toString(),
-          title: this.achievementForm.title || 'New Achievement',
-          description: this.achievementForm.description || '',
-          icon: this.achievementForm.icon || '🏆',
-          date: this.achievementForm.date,
-          organization: this.achievementForm.organization,
-          backgroundImage: imageDataUrl
-        };
-        this.achievements.set([...this.achievements(), newAchievement]);
-        this.selectedAchievementBackgroundFile = null;
-        this.achievementForm = {};
-        this.addingAchievement.set(false);
-        this.saveToStorage();
-      };
-      reader.readAsDataURL(this.selectedAchievementBackgroundFile);
-    } else {
-      const newAchievement: Achievement = {
-        id: Date.now().toString(),
+
+    const doCreate = (backgroundImage?: string) => {
+      const body: Partial<Achievement> = {
         title: this.achievementForm.title || 'New Achievement',
         description: this.achievementForm.description || '',
         icon: this.achievementForm.icon || '🏆',
         date: this.achievementForm.date,
         organization: this.achievementForm.organization,
-        backgroundImage: this.achievementForm.backgroundImage
+        backgroundImage: backgroundImage ?? this.achievementForm.backgroundImage
       };
-      this.achievements.set([...this.achievements(), newAchievement]);
-      this.achievementForm = {};
-      this.addingAchievement.set(false);
-      this.saveToStorage();
+      this.achievementService.create(body).subscribe((created) => {
+        if (created) {
+          this.achievements.set([...this.achievements(), created]);
+          this.saveToStorage();
+        }
+        this.selectedAchievementBackgroundFile = null;
+        this.achievementForm = {};
+        this.addingAchievement.set(false);
+      });
+    };
+
+    if (this.selectedAchievementBackgroundFile) {
+      this.uploadingImage.set(true);
+      this.imageUploadService.uploadAchievementImage(this.selectedAchievementBackgroundFile).subscribe({
+        next: (imageUrl) => {
+          this.uploadingImage.set(false);
+          doCreate(imageUrl);
+        },
+        error: (err) => {
+          console.error('Error uploading achievement image:', err);
+          this.uploadingImage.set(false);
+          doCreate();
+        }
+      });
+    } else {
+      doCreate();
     }
   }
 

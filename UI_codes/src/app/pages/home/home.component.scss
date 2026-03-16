@@ -491,7 +491,7 @@
 // Achievements Section
 .achievements-section {
   width: 100%;
-  // height: 60em;
+  height: 60em;
   margin: 2rem 0;
   padding: 3rem 2rem;
   background: rgba(255, 255, 255, 0.05);
@@ -499,12 +499,20 @@
   border-radius: 20px;
   animation: fadeInUp 0.8s ease-out 1s both;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .achievements-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 24px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px; // space for scrollbar
 }
 
 .achievement-item-wrapper {

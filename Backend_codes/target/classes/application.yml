@@ -4,6 +4,19 @@ server:
 spring:
   application:
     name: personal-ai-backend
+  datasource:
+    url: jdbc:mysql://localhost:3306/portfolio
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    database-platform: org.hibernate.dialect.MySQLDialect
+    properties:
+      hibernate:
+        format_sql: true
   servlet:
     multipart:
       enabled: true

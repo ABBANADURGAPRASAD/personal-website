@@ -1,10 +1,9 @@
 package com.example.demo.controller;
 
-import com.example.demo.service.ImageStorageService;
 import java.io.IOException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,9 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.demo.service.ImageStorageService;
+
 @RestController
 @RequestMapping("/api/images")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:63535", "http://127.0.0.1:4200", "http://127.0.0.1:63535"})
 public class ImageUploadController {
 
   private final ImageStorageService imageStorageService;

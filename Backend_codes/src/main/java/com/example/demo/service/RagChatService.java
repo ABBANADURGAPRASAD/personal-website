@@ -6,10 +6,14 @@ import com.example.demo.llm.LocalLlmClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RagChatService {
+
+  private static final Logger log = LoggerFactory.getLogger(RagChatService.class);
 
   private final WebDataIndexer webDataIndexer;
   private final LocalLlmClient localLlmClient;
@@ -120,7 +124,7 @@ public class RagChatService {
     try {
       llmReply = localLlmClient.generate(userPrompt, SYSTEM_PROMPT);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("LLM generation failed", e);
       llmReply = "Sorry, I encountered a technical issue processing your request. Please try again later.";
     }
 

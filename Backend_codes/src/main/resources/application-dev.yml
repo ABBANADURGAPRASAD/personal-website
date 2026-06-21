@@ -1,0 +1,34 @@
+spring:
+  profiles: dev
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/portfolio
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+ai:
+  ollama:
+    baseUrl: http://localhost:11434
+    model: llama3
+
+cors:
+  allowedOrigins:
+    - http://localhost:4200
+    - http://127.0.0.1:4200
+
+mail:
+  from: your-email@example.com
+  to: your-email@example.com
+  subject:
+    prefix: "Portfolio Contact Form: "
+
+app:
+  upload:
+    dir: uploads

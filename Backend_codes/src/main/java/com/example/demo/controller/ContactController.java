@@ -1,26 +1,26 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.ContactRequest;
-import com.example.demo.dto.ContactResponse;
-import com.example.demo.service.EmailService;
-import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dto.ContactRequest;
+import com.example.demo.dto.ContactResponse;
+import com.example.demo.service.EmailService;
+
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/contact")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:63535", "http://127.0.0.1:4200", "http://127.0.0.1:63535"}, 
-             allowedHeaders = "*", 
-             methods = {org.springframework.web.bind.annotation.RequestMethod.POST, 
-                       org.springframework.web.bind.annotation.RequestMethod.OPTIONS})
 public class ContactController {
 
   private final EmailService emailService;
+  private static final Logger log = LoggerFactory.getLogger(ContactController.class);
 
   public ContactController(EmailService emailService) {
     this.emailService = emailService;
@@ -44,7 +44,7 @@ public class ContactController {
             .body(new ContactResponse(false, "Failed to send email. Please try again later."));
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Error handling contact submission", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(new ContactResponse(false, "An error occurred while processing your request."));
     }

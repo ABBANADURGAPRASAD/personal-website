@@ -1,0 +1,42 @@
+spring:
+  profiles: prod
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+  mail:
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+
+cors:
+  allowedOrigins:
+    - ${FRONTEND_URL}
+
+app:
+  upload:
+    dir: ${UPLOAD_DIR:uploads}
+
+# Ollama configuration: disabled by default. Set these env vars to enable.
+ai:
+  ollama:
+    baseUrl: ${OLLAMA_BASE_URL:}
+    model: ${OLLAMA_MODEL:llama3}
+
+# Management / Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true

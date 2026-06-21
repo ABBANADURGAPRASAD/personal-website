@@ -1,6 +1,7 @@
 package com.example.demo.config;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,8 +12,11 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 public class CorsConfig {
 
-  @Value("${cors.allowedOrigins:http://localhost:4200}")
+  @Value("${cors.allowedOrigins:}")
   private List<String> allowedOrigins;
+
+  @Value("${spring.profiles.active:}")
+  private String activeProfile;
 
   @Bean
   public CorsFilter corsFilter() {
@@ -20,15 +24,22 @@ public class CorsConfig {
     config.setAllowCredentials(true);
     
     // For development: allow all localhost ports using patterns
-    // This is more flexible than listing every port
-    config.addAllowedOriginPattern("http://localhost:*");
-    config.addAllowedOriginPattern("http://127.0.0.1:*");
+    // Only enable these relaxed patterns in the dev profile
+    if (activeProfile != null && activeProfile.contains("dev")) {
+      config.addAllowedOriginPattern("http://localhost:*");
+      config.addAllowedOriginPattern("http://127.0.0.1:*");
+    }
     
     // Also add specific configured origins as backup
     if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
       allowedOrigins.forEach(origin -> {
-        if (!origin.contains("*")) {
-          config.addAllowedOrigin(origin);
+        if (origin == null) return;
+        String o = origin.trim();
+        if (o.isEmpty()) return; // skip empty values (e.g. unset FRONTEND_URL)
+        if (o.contains("*")) {
+          config.addAllowedOriginPattern(o);
+        } else {
+          config.addAllowedOrigin(o);
         }
       });
     }

@@ -1,22 +1,12 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
 
+# Default active profile for local development
 spring:
   application:
     name: personal-ai-backend
-  datasource:
-    url: jdbc:mysql://localhost:3306/portfolio
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: root
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
-    database-platform: org.hibernate.dialect.MySQLDialect
-    properties:
-      hibernate:
-        format_sql: true
+  profiles:
+    active: dev
   servlet:
     multipart:
       enabled: true
@@ -25,8 +15,6 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USERNAME:abbanadurgaprasad9390@gmail.com}  # Use environment variable or set here
-    password: ${MAIL_PASSWORD:nmiofxzlgcallpqq}      # Use environment variable for security
     properties:
       mail:
         smtp:
@@ -38,32 +26,14 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
+# CORS origins (profile-specific lists in profile files). If empty, CorsConfig will
+# rely on allowed origin patterns or profile-aware behavior.
 cors:
-  allowedOrigins:
-    - "http://localhost:4200"
-    - "http://localhost:63535"
-    - "http://127.0.0.1:4200"
-    - "http://127.0.0.1:63535"
+  allowedOrigins: []
 
-ai:
-  profileUrls:
-    - "https://your-portfolio-site.com"
-    - "https://github.com/your-username"
-
-  ollama:
-    baseUrl: "http://localhost:11434"
-    model: "llama3"
-
-# Email Configuration
-mail:
-  from: "abbanadurgaprasad9390@gmail.com"  # Your email address (sender)
-  to: "abbanadurgaprasad9390@gmail.com"      # Your email address (recipient for notifications)
-  subject:
-    prefix: "Portfolio Contact Form: "
-
-# Image Upload Configuration
+# Upload directory - can be overridden by environment variable UPLOAD_DIR
 app:
   upload:
-    dir: "uploads"  # Directory for storing uploaded images (relative to project root)
+    dir: ${UPLOAD_DIR:uploads}
 
-
+# AI config is environment/profile specific and will be set in profile files

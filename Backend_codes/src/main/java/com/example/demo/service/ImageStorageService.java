@@ -6,12 +6,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.annotation.PostConstruct;
+
 @Service
 public class ImageStorageService {
+  private static final Logger log = LoggerFactory.getLogger(ImageStorageService.class);
 
   @Value("${app.upload.dir:uploads}")
   private String uploadDir;
@@ -24,7 +30,22 @@ public class ImageStorageService {
    * Initialize upload directories on service creation
    */
   public ImageStorageService() {
-    // Directories will be created in the first upload
+    // Directories will be created in @PostConstruct to ensure upload dir exists
+  }
+
+  @PostConstruct
+  public void initUploadDirs() {
+    try {
+      Path base = Paths.get(uploadDir);
+      Files.createDirectories(base);
+      Files.createDirectories(base.resolve(PROFILE_IMAGES_DIR));
+      Files.createDirectories(base.resolve(GALLERY_IMAGES_DIR));
+      Files.createDirectories(base.resolve(ACHIEVEMENT_IMAGES_DIR));
+    } catch (Exception e) {
+      // log and continue; do not crash startup
+      log.warn("Failed to create upload directories: {}", e.getMessage());
+      log.debug("Stacktrace while creating upload directories", e);
+    }
   }
 
   /**
